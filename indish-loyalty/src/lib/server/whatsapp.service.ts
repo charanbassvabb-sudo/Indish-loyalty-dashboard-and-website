@@ -181,17 +181,26 @@ export async function sendRegistrationNotifications(payload: RegistrationNotific
   await Promise.allSettled(sends);
 }
 
-/** The one line that differs between an ordinary visit and the reward-unlocking one. */
+/**
+ * The one line that differs between an ordinary visit and the
+ * reward-unlocking one. Deliberately plain/factual wording (no "unlock",
+ * no exclamation marks, no emoji) — the first version of this ("...to
+ * unlock your reward!") got auto-reclassified from UTILITY to MARKETING
+ * by Meta's template reviewer despite being submitted as UTILITY, which
+ * defeats the point (a MARKETING template can be blocked by a customer's
+ * marketing opt-out). Kept neutral here to give the resubmission the best
+ * chance of actually staying UTILITY.
+ */
 function visitProgressClause(p: VisitProgressNotificationPayload): string {
   const remaining = p.rewardVisit - p.visitCount;
-  if (remaining <= 0) return "🎉 Your reward is ready — ask a staff member to claim it!";
-  return `${remaining} more visit${remaining === 1 ? "" : "s"} to unlock your reward!`;
+  if (remaining <= 0) return "Your reward is now available — please see a staff member.";
+  return `${remaining} visit${remaining === 1 ? "" : "s"} remain before your reward is available.`;
 }
 
 function formatVisitProgressMessage(p: VisitProgressNotificationPayload): string {
   return [
-    `Thanks for visiting ${p.branchName} today, ${p.customerName}!`,
-    `You're now at ${p.visitCount} of ${p.rewardVisit} visits.`,
+    `Hi ${p.customerName}, your visit at ${p.branchName} has been recorded.`,
+    `Visit count: ${p.visitCount} of ${p.rewardVisit}.`,
     visitProgressClause(p),
     AUTOMATED_DISCLAIMER,
   ].join("\n");
@@ -200,12 +209,12 @@ function formatVisitProgressMessage(p: VisitProgressNotificationPayload): string
 /**
  * Notifies a customer after a visit is logged (addVisitFn) — separate from
  * registration, which already covers their very first visit. Not yet wired
- * to a template: loyalty_visit_update was submitted to Meta for approval
- * (UTILITY, same reasoning as loyalty_registered over loyalty_welcome —
- * this needs to reach every customer, not just marketing opt-ins) but is
- * still PENDING as of writing. Until WHATSAPP_VISIT_UPDATE_TEMPLATE_NAME is
- * set, this only actually delivers within an open 24h session — fine for
- * testing, not for real customers who haven't messaged the business first.
+ * to a template: loyalty_visit_update_v2 was submitted to Meta for approval
+ * (UTILITY — see visitProgressClause() above for why it's "_v2" and why the
+ * wording is deliberately neutral) but is still PENDING as of writing.
+ * Until WHATSAPP_VISIT_UPDATE_TEMPLATE_NAME is set, this only actually
+ * delivers within an open 24h session — fine for testing, not for real
+ * customers who haven't messaged the business first.
  */
 export async function sendVisitProgressNotification(payload: VisitProgressNotificationPayload) {
   const templateName = process.env.WHATSAPP_VISIT_UPDATE_TEMPLATE_NAME;
