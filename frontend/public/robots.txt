@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /admin
 
-Sitemap: https://www.indishkitwe.com/sitemap.xml
+Sitemap: https://www.indishzambia.com/sitemap.xml

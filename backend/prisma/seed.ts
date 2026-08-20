@@ -106,16 +106,16 @@ async function main() {
   } else {
     const passwordHash = await bcrypt.hash(seedAdminPassword, 12);
     await prisma.admin.upsert({
-      where: { email: "owner@indishkitwe.com" },
+      where: { email: "owner@indishzambia.com" },
       update: {},
       create: {
         name: "Indish Owner",
-        email: "owner@indishkitwe.com",
+        email: "owner@indishzambia.com",
         passwordHash,
         role: "OWNER",
       },
     });
-    console.log("Seeded default admin: owner@indishkitwe.com");
+    console.log("Seeded default admin: owner@indishzambia.com");
   }
 
   await seedMenu();

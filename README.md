@@ -127,7 +127,7 @@ Configured via `VITE_LOYALTY_APP_URL` (frontend/.env) and `VITE_RESTAURANT_ADMIN
   were added in `frontend/src/assets/images` + `frontend/src/data/branches.ts`.
 - **Menu pricing/availability** — transcribed directly from the restaurant's own May 2025 menu
   PDF (the one that lists both branches); double check nothing has changed since.
-- **Domain-specific values** — `frontend/index.html` has OG/canonical URLs (`indishkitwe.com`)
+- **Domain-specific values** — `frontend/index.html` has OG/canonical URLs (`indishzambia.com`)
   and `deploy/nginx.conf` / `DEPLOY.md` assume that domain — update if it ever changes.
 - **`deploy/` doesn't cover `indish-loyalty/` yet** — it's a separate TanStack Start app (SSR,
   Netlify Functions by default per its own README) with its own deployment story; the droplet

@@ -11,7 +11,7 @@ interface DocumentMetaOptions {
   noindex?: boolean;
 }
 
-const SITE_URL = "https://www.indishkitwe.com";
+const SITE_URL = "https://www.indishzambia.com";
 const DEFAULT_TITLE = "Indish — Fire-Forward Indian Restaurant | Lusaka & Kitwe, Zambia";
 const DEFAULT_DESCRIPTION =
   "Indish serves tandoor-fired, fusion-forward Indian cuisine at two branches in Zambia: EastPark Mall, Lusaka and Kitwe. Reserve a table online.";

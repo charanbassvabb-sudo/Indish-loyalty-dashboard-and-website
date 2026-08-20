@@ -3,7 +3,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { env } from "../config/env";
 import { sendFaqAutoReply } from "../services/whatsapp.service";
 
-const SITE_URL = "https://indishkitwe.com";
+const SITE_URL = "https://indishzambia.com";
 
 /**
  * FAQ auto-answers — deliberately narrow. This only replies when the

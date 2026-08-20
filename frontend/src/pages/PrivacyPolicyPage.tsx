@@ -79,7 +79,7 @@ export default function PrivacyPolicyPage() {
   useDocumentMeta({
     title: "Privacy Policy | Indish",
     description: "How Indish collects, uses, and protects your personal information when you reserve a table or pay a deposit.",
-    canonical: "https://www.indishkitwe.com/privacy-policy",
+    canonical: "https://www.indishzambia.com/privacy-policy",
   });
 
   return (

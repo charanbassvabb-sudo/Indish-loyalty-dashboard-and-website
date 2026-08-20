@@ -75,7 +75,7 @@ Final layout expected by the configs in this `deploy/` folder:
 cd /var/www/indish/backend
 npm ci
 cp .env.example .env
-nano .env   # DATABASE_URL, JWT_SECRET (openssl rand -base64 48), CORS_ORIGIN=https://indishkitwe.com, WhatsApp Cloud API creds, etc.
+nano .env   # DATABASE_URL, JWT_SECRET (openssl rand -base64 48), CORS_ORIGIN=https://indishzambia.com, WhatsApp Cloud API creds, etc.
 
 npx prisma generate
 npx prisma migrate deploy
@@ -99,7 +99,7 @@ npm ci
 npm run build   # outputs dist/ — this is what Nginx serves
 ```
 
-Set `VITE_API_URL=https://indishkitwe.com/api` (or your domain) in `frontend/.env.production` before
+Set `VITE_API_URL=https://indishzambia.com/api` (or your domain) in `frontend/.env.production` before
 building if the frontend's API base URL isn't already relative (`/api`) — relative is the default
 and preferred, since it avoids CORS entirely on the deployed domain.
 
@@ -119,7 +119,7 @@ Point your domain's A record at the droplet's IP before the next step.
 
 ```bash
 apt install -y certbot python3-certbot-nginx
-certbot --nginx -d indishkitwe.com -d www.indishkitwe.com
+certbot --nginx -d indishzambia.com -d www.indishzambia.com
 ```
 
 Certbot edits the Nginx config in place to add the HTTPS server block and redirect HTTP -> HTTPS,
