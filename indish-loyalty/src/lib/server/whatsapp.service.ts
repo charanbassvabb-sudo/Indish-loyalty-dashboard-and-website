@@ -72,12 +72,6 @@ async function sendWhatsAppMessage(to: string, body: string): Promise<void> {
   }
 }
 
-/**
- * Once a loyalty-registration template is approved in Meta Business Manager,
- * set WHATSAPP_LOYALTY_TEMPLATE_NAME and update this parameter list (order
- * must match the template body's {{1}}, {{2}}, ... variables exactly) — see
- * buildConfirmationTemplateParams() in the restaurant app for the pattern.
- */
 async function sendWhatsAppTemplate(
   to: string,
   templateName: string,
@@ -121,8 +115,10 @@ async function sendWhatsAppTemplate(
 }
 
 // Kept in sync with the restaurant backend's AUTOMATED_DISCLAIMER (see
-// backend/src/services/whatsapp.service.ts) and the Footer field on the
-// loyalty_registered template, once approved.
+// backend/src/services/whatsapp.service.ts). Only appears in the free-text
+// fallback below — the approved loyalty_registered template has no footer
+// variable, and (like reservation_confirmation on the restaurant side)
+// isn't being re-submitted just to add one.
 const AUTOMATED_DISCLAIMER = "Automated message — replies & calls aren't monitored.";
 
 function formatCustomerMessage(p: RegistrationNotificationPayload): string {
@@ -146,6 +142,14 @@ function formatOwnerMessage(p: RegistrationNotificationPayload): string {
 /**
  * Notifies the newly-registered customer and the configured owner/staff
  * number (LOYALTY_NOTIFY_PHONE_NUMBER). Called from registerCustomerFn.
+ *
+ * WHATSAPP_LOYALTY_TEMPLATE_NAME points at loyalty_registered — a UTILITY
+ * template (reaches every customer regardless of marketing opt-in, unlike
+ * the also-approved but MARKETING-classified loyalty_welcome). Its body
+ * only takes 3 variables ({{1}} name, {{2}} branch, {{3}} loyalty ID), so
+ * the visit-target/campaign-length detail that the free-text fallback below
+ * includes isn't in the templated message — it's already shown on-screen
+ * at registration.
  */
 export async function sendRegistrationNotifications(payload: RegistrationNotificationPayload) {
   const templateName = process.env.WHATSAPP_LOYALTY_TEMPLATE_NAME;
@@ -154,8 +158,6 @@ export async function sendRegistrationNotifications(payload: RegistrationNotific
         { type: "text", text: payload.customerName },
         { type: "text", text: payload.branchName },
         { type: "text", text: payload.loyaltyId },
-        { type: "text", text: String(payload.rewardVisit) },
-        { type: "text", text: String(payload.campaignDuration) },
       ])
     : sendWhatsAppMessage(payload.phone, formatCustomerMessage(payload));
 
