@@ -89,32 +89,34 @@ function ReportsPage() {
         transition={{ delay: 0.3, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       >
         <Card className="overflow-hidden border-border/60 bg-card">
-          <table className="w-full text-sm">
-            <thead className="border-b border-border/60 bg-muted/40 text-left text-xs uppercase tracking-wider text-muted-foreground">
-              <tr>
-                <th className="px-4 py-3">Customer</th>
-                <th className="px-4 py-3">Visits</th>
-                <th className="px-4 py-3">Reward</th>
-                <th className="px-4 py-3">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/60">
-              {customers.map((c, i) => (
-                <motion.tr
-                  key={c.id}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: Math.min(i, 20) * 0.02 }}
-                  className="transition-colors hover:bg-accent/20"
-                >
-                  <td className="px-4 py-3">{c.fullName}</td>
-                  <td className="px-4 py-3 text-gold">{c.visitCount}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{c.rewardType ?? "—"}</td>
-                  <td className="px-4 py-3 capitalize">{c.status}</td>
-                </motion.tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="border-b border-border/60 bg-muted/40 text-left text-xs uppercase tracking-wider text-muted-foreground">
+                <tr>
+                  <th className="px-4 py-3">Customer</th>
+                  <th className="px-4 py-3">Visits</th>
+                  <th className="px-4 py-3">Reward</th>
+                  <th className="px-4 py-3">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/60">
+                {customers.map((c, i) => (
+                  <motion.tr
+                    key={c.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: Math.min(i, 20) * 0.02 }}
+                    className="transition-colors hover:bg-accent/20"
+                  >
+                    <td className="whitespace-nowrap px-4 py-3">{c.fullName}</td>
+                    <td className="px-4 py-3 text-gold">{c.visitCount}</td>
+                    <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{c.rewardType ?? "—"}</td>
+                    <td className="px-4 py-3 capitalize">{c.status}</td>
+                  </motion.tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </Card>
       </motion.div>
     </div>

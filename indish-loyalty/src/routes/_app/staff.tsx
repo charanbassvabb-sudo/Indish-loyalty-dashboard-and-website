@@ -142,46 +142,48 @@ function StaffPage() {
       </header>
 
       <Card className="overflow-hidden border-border/60 bg-card">
-        <table className="w-full text-sm">
-          <thead className="border-b border-border/60 bg-muted/40 text-left text-xs uppercase tracking-wider text-muted-foreground">
-            <tr>
-              <th className="px-4 py-3">Staff</th>
-              <th className="px-4 py-3">Username</th>
-              <th className="px-4 py-3">Role</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3" />
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border/60">
-            {staff.map((m) => (
-              <tr key={m.id}>
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gold-gradient font-semibold text-primary-foreground">
-                      {m.fullName[0]}
-                    </div>
-                    <span className="font-medium">{m.fullName}</span>
-                  </div>
-                </td>
-                <td className="px-4 py-3 font-mono text-muted-foreground">{m.username}</td>
-                <td className="px-4 py-3">
-                  <Badge variant="outline" className={m.role === "manager" ? "border-gold/40 text-gold" : ""}>
-                    {m.role === "manager" && <Shield className="mr-1 h-3 w-3" />}
-                    {m.role}
-                  </Badge>
-                </td>
-                <td className="px-4 py-3">
-                  <Badge variant="outline" className={m.active ? "border-success/40 text-success" : "border-muted-foreground/40 text-muted-foreground"}>
-                    {m.active ? "Active" : "Disabled"}
-                  </Badge>
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <Button size="sm" variant="ghost" onClick={() => setEditing(m)}>Edit</Button>
-                </td>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="border-b border-border/60 bg-muted/40 text-left text-xs uppercase tracking-wider text-muted-foreground">
+              <tr>
+                <th className="px-4 py-3">Staff</th>
+                <th className="px-4 py-3">Username</th>
+                <th className="px-4 py-3">Role</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3" />
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-border/60">
+              {staff.map((m) => (
+                <tr key={m.id}>
+                  <td className="whitespace-nowrap px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gold-gradient font-semibold text-primary-foreground">
+                        {m.fullName[0]}
+                      </div>
+                      <span className="font-medium">{m.fullName}</span>
+                    </div>
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3 font-mono text-muted-foreground">{m.username}</td>
+                  <td className="whitespace-nowrap px-4 py-3">
+                    <Badge variant="outline" className={m.role === "manager" ? "border-gold/40 text-gold" : ""}>
+                      {m.role === "manager" && <Shield className="mr-1 h-3 w-3" />}
+                      {m.role}
+                    </Badge>
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3">
+                    <Badge variant="outline" className={m.active ? "border-success/40 text-success" : "border-muted-foreground/40 text-muted-foreground"}>
+                      {m.active ? "Active" : "Disabled"}
+                    </Badge>
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3 text-right">
+                    <Button size="sm" variant="ghost" onClick={() => setEditing(m)}>Edit</Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </Card>
 
       <Dialog open={!!editing} onOpenChange={(open) => !open && setEditing(null)}>

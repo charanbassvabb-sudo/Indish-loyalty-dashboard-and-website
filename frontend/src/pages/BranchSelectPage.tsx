@@ -33,11 +33,14 @@ export default function BranchSelectPage() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-background">
+      {/* In normal flow (stacked above the branch panels) on mobile so it never
+          overlaps their content; only becomes an overlay on the desktop
+          split-screen layout, where the panels are tall enough to sit under it. */}
       <motion.div
         initial="hidden"
         animate="show"
         variants={container}
-        className="pointer-events-none absolute inset-x-0 top-0 z-10 flex flex-col items-center px-6 pt-16 text-center md:pt-20"
+        className="relative z-10 flex flex-col items-center px-6 pb-8 pt-16 text-center md:pointer-events-none md:absolute md:inset-x-0 md:top-0 md:pb-0 md:pt-20"
       >
         <motion.span variants={item} className="eyebrow">
           Zambia · Two Kitchens

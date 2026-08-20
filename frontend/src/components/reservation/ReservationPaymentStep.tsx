@@ -217,8 +217,8 @@ export function ReservationPaymentStep({ branchId, reference, depositAmount, onV
         <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           {selected.isAgentNumber ? `Get Cash — pay ZMW ${depositAmount} to Agent` : `Send ZMW ${depositAmount} to`}
         </span>
-        <div className="flex items-center gap-3">
-          <span className="font-display text-3xl text-foreground">{formatPhone(selected.number)}</span>
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <span className="font-display text-2xl text-foreground sm:text-3xl">{formatPhone(selected.number)}</span>
           <button
             type="button"
             onClick={copyNumber}
