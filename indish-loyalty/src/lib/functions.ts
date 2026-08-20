@@ -9,7 +9,7 @@ import { pool } from "@/lib/server/db";
 import { createSessionToken, SESSION_COOKIE, SESSION_MAX_AGE_SECONDS } from "@/lib/server/auth";
 import { getSessionStaff, invalidateStaffCache } from "@/lib/server/session.server";
 import { BRANCH_COOKIE, BRANCH_MAX_AGE_SECONDS, getSelectedBranch } from "@/lib/server/branch.server";
-import { sendRegistrationNotifications } from "@/lib/server/whatsapp.service";
+import { sendRegistrationNotifications, sendVisitProgressNotification } from "@/lib/server/whatsapp.service";
 import {
   mapCustomer,
   mapSettings,
@@ -285,7 +285,19 @@ export const addVisitFn = createServerFn({ method: "POST" })
     const [updated] = await pool.query<CustomerRow[]>("SELECT * FROM customers WHERE id = ?", [
       data.customerId,
     ]);
-    return mapCustomer(updated[0]);
+    const updatedCustomer = mapCustomer(updated[0]);
+
+    // Fire-and-forget, same as the registration notification — a WhatsApp
+    // outage shouldn't block the visit itself from being recorded.
+    sendVisitProgressNotification({
+      customerName: updatedCustomer.fullName,
+      phone: updatedCustomer.phone,
+      branchName: settings.restaurant_name,
+      visitCount: updatedCustomer.visitCount,
+      rewardVisit: settings.reward_visit,
+    }).catch((err) => console.error("[whatsapp] visit progress notification failed", err));
+
+    return updatedCustomer;
   });
 
 export const claimRewardFn = createServerFn({ method: "POST" })

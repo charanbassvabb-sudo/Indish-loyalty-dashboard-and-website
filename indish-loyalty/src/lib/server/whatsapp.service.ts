@@ -15,6 +15,14 @@ interface RegistrationNotificationPayload {
   campaignDuration: number;
 }
 
+interface VisitProgressNotificationPayload {
+  customerName: string;
+  phone: string;
+  branchName: string;
+  visitCount: number;
+  rewardVisit: number;
+}
+
 const GRAPH_API_BASE = "https://graph.facebook.com";
 
 function apiVersion() {
@@ -171,4 +179,45 @@ export async function sendRegistrationNotifications(payload: RegistrationNotific
   }
 
   await Promise.allSettled(sends);
+}
+
+/** The one line that differs between an ordinary visit and the reward-unlocking one. */
+function visitProgressClause(p: VisitProgressNotificationPayload): string {
+  const remaining = p.rewardVisit - p.visitCount;
+  if (remaining <= 0) return "🎉 Your reward is ready — ask a staff member to claim it!";
+  return `${remaining} more visit${remaining === 1 ? "" : "s"} to unlock your reward!`;
+}
+
+function formatVisitProgressMessage(p: VisitProgressNotificationPayload): string {
+  return [
+    `Thanks for visiting ${p.branchName} today, ${p.customerName}!`,
+    `You're now at ${p.visitCount} of ${p.rewardVisit} visits.`,
+    visitProgressClause(p),
+    AUTOMATED_DISCLAIMER,
+  ].join("\n");
+}
+
+/**
+ * Notifies a customer after a visit is logged (addVisitFn) — separate from
+ * registration, which already covers their very first visit. Not yet wired
+ * to a template: loyalty_visit_update was submitted to Meta for approval
+ * (UTILITY, same reasoning as loyalty_registered over loyalty_welcome —
+ * this needs to reach every customer, not just marketing opt-ins) but is
+ * still PENDING as of writing. Until WHATSAPP_VISIT_UPDATE_TEMPLATE_NAME is
+ * set, this only actually delivers within an open 24h session — fine for
+ * testing, not for real customers who haven't messaged the business first.
+ */
+export async function sendVisitProgressNotification(payload: VisitProgressNotificationPayload) {
+  const templateName = process.env.WHATSAPP_VISIT_UPDATE_TEMPLATE_NAME;
+  const send = templateName
+    ? sendWhatsAppTemplate(payload.phone, templateName, [
+        { type: "text", text: payload.customerName },
+        { type: "text", text: payload.branchName },
+        { type: "text", text: String(payload.visitCount) },
+        { type: "text", text: String(payload.rewardVisit) },
+        { type: "text", text: visitProgressClause(payload) },
+      ])
+    : sendWhatsAppMessage(payload.phone, formatVisitProgressMessage(payload));
+
+  await send;
 }
