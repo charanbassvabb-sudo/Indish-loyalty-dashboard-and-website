@@ -1,0 +1,277 @@
+// Indish — Prisma schema
+// Run `npx prisma migrate dev --name init` after setting DATABASE_URL in .env
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum BranchCode {
+  LUSAKA
+  KITWE
+}
+
+enum SeatingPreference {
+  INDOOR
+  OUTDOOR
+  NO_PREFERENCE
+}
+
+enum PaymentProvider {
+  AIRTEL_MONEY
+  MTN_MOMO
+  ZAMTEL_KWACHA
+}
+
+// How a PaymentAttempt's status was decided. Every attempt today is
+// SCREENSHOT_OCR — reading an uploaded screenshot is proof-of-claim, not the
+// same as Airtel/MTN themselves confirming the transfer. AIRTEL_API/MTN_API
+// exist now so a future real API/webhook integration is a new value in this
+// enum plus a new code path, not a schema rework — see PaymentAttempt below.
+enum VerificationMethod {
+  SCREENSHOT_OCR
+  MANUAL
+  AIRTEL_API
+  MTN_API
+}
+
+enum PaymentAttemptStatus {
+  PROCESSING // OCR/verification running
+  AUTO_VERIFIED // system matched everything with high confidence
+  REQUIRES_REVIEW // uncertain — needs a staff member to look at the screenshot
+  APPROVED // staff manually approved after review
+  REJECTED // staff manually rejected (wrong amount, fake, etc.)
+  DUPLICATE // this transaction ID was already used on a verified attempt
+  PAYMENT_FAILED // screenshot itself shows a failed/declined transaction
+}
+
+enum ReservationStatus {
+  PENDING_PAYMENT
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+enum AdminRole {
+  OWNER
+  MANAGER
+  STAFF
+}
+
+enum BookingType {
+  STANDARD
+  PARTY
+}
+
+// Menu categories are a small, fixed-ish set (tabs on the public menu page),
+// managed by seed data today — only items within them are admin-editable via
+// the dashboard. slug is stable across renames (used for the public tab
+// order / React keys), separate from the display label.
+model MenuCategory {
+  id        Int      @id @default(autoincrement())
+  slug      String   @unique
+  label     String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items MenuItem[]
+
+  @@map("menu_categories")
+}
+
+// One shared menu by default (branchCode null = shown at both branches,
+// matching how the menu has always worked) — a specific BranchCode scopes an
+// item to just that branch, e.g. a one-off Kitwe-only special. Deleting a row
+// is a real delete, not a soft flag: "remove it any time" per the admin spec
+// this was built for.
+model MenuItem {
+  id         Int          @id @default(autoincrement())
+  categoryId Int
+  category   MenuCategory @relation(fields: [categoryId], references: [id])
+  branchCode BranchCode?
+
+  name        String
+  description String  @db.Text
+  price       Decimal @db.Decimal(10, 2)
+  veg         Boolean @default(false)
+  // Subset of the frontend's MenuBadge union (validated in the Zod schema,
+  // not the DB — MySQL has no native string-array column via Prisma).
+  badges      Json?
+  sortOrder   Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([branchCode])
+  @@map("menu_items")
+}
+
+model Branch {
+  id            Int        @id @default(autoincrement())
+  code          BranchCode @unique
+  name          String
+  address       String
+  plusCode      String
+  phone         String
+  allowsOutdoor Boolean    @default(false)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  reservations Reservation[]
+  availability DailyAvailability[]
+
+  @@map("branches")
+}
+
+model Admin {
+  id           Int       @id @default(autoincrement())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         AdminRole @default(STAFF)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  reviewedPayments PaymentAttempt[]
+
+  @@map("admins")
+}
+
+model Reservation {
+  id        Int    @id @default(autoincrement())
+  reference String @unique // e.g. IND-LU-A3F9C
+  branchId  Int
+  branch    Branch @relation(fields: [branchId], references: [id])
+
+  bookingType BookingType @default(STANDARD)
+  eventType   String?
+
+  customerName String
+  phone        String
+  email        String
+  guests       Int
+  date         DateTime          @db.Date
+  time         String // one of the fixed time slots, e.g. "19:30"
+  seating      SeatingPreference @default(NO_PREFERENCE)
+  occasion     String?
+  notes        String?           @db.Text
+
+  depositAmount Decimal           @db.Decimal(10, 2)
+  status        ReservationStatus @default(PENDING_PAYMENT)
+
+  paymentAttempts PaymentAttempt[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([branchId, date])
+  @@index([status])
+  @@map("reservations")
+}
+
+// One row per branch/date. Lets staff manually flag a day as fully booked,
+// or publish how many seats are left, without touching the reservation rows.
+model DailyAvailability {
+  id          Int      @id @default(autoincrement())
+  branchId    Int
+  branch      Branch   @relation(fields: [branchId], references: [id])
+  date        DateTime @db.Date
+  seatsLeft   Int? // null = not tracked / unlimited
+  fullyBooked Boolean  @default(false)
+  note        String? // e.g. "Private event 6-9pm"
+
+  updatedByName String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([branchId, date])
+  @@map("daily_availability")
+}
+
+// Small, flexible key/value store so the admin dashboard can edit copy
+// across the public site (hero tagline, about text, hours, etc.) without a
+// redeploy. `branchCode` is null for site-wide values.
+model SiteContent {
+  id         Int         @id @default(autoincrement())
+  key        String
+  branchCode BranchCode?
+  value      String      @db.Text
+  updatedAt  DateTime    @updatedAt
+
+  @@unique([key, branchCode])
+  @@map("site_content")
+}
+
+// One row per screenshot a customer uploads for a reservation. A booking can
+// have several — a first attempt that failed OCR, then a retry that
+// verified — so the history of what was tried is never lost. Exactly one
+// attempt per reservation should ever reach AUTO_VERIFIED or APPROVED; that's
+// the one that actually confirmed the table (enforced in application code,
+// not the schema, since "at most one of several rows" isn't a constraint
+// SQL/Prisma can express directly).
+model PaymentAttempt {
+  id            Int         @id @default(autoincrement())
+  reservationId Int
+  reservation   Reservation @relation(fields: [reservationId], references: [id])
+
+  // What we told the customer to pay/send to, captured at upload time so a
+  // later change to business numbers doesn't retroactively change what an
+  // old attempt was checked against.
+  provider          PaymentProvider
+  expectedAmount    Decimal         @db.Decimal(10, 2)
+  expectedRecipient String
+
+  // The uploaded file itself. Stored on disk, not public — see
+  // payment.routes.ts for the authenticated admin route that serves it.
+  screenshotPath String
+  screenshotMime String
+
+  // Raw OCR output kept for debugging/audit even after fields are parsed
+  // out of it below.
+  ocrRawText String? @db.Text
+
+  extractedAmount        Decimal? @db.Decimal(10, 2)
+  extractedTransactionId String?
+  extractedSender        String?
+  extractedRecipient     String?
+  extractedDate          String?
+  extractedTime          String?
+  extractedStatus        String? // "successful" | "failed" | "pending" | "unknown"
+
+  // Per-field pass/fail against the expected values — shown to the admin
+  // exactly like this, field by field, rather than making them re-derive it.
+  matchAmount       Boolean?
+  matchRecipient    Boolean?
+  matchStatus       Boolean?
+  matchRecency      Boolean?
+  matchNotDuplicate Boolean?
+  confidenceScore   Int? // 0-100, informational — the boolean matches above are what decide the status
+
+  status             PaymentAttemptStatus @default(PROCESSING)
+  verificationMethod VerificationMethod   @default(SCREENSHOT_OCR)
+
+  reviewedByAdminId Int?
+  reviewedByAdmin   Admin?    @relation(fields: [reviewedByAdminId], references: [id])
+  reviewNotes       String?   @db.Text
+  reviewedAt        DateTime?
+
+  // Our own reference, independent of whatever Airtel/MTN's transaction ID
+  // looks like — e.g. PAY-2026-83921. The customer never needs to enter
+  // this anywhere; it just ties this attempt back to the booking internally.
+  internalPaymentId String @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([extractedTransactionId])
+  @@index([reservationId])
+  @@index([status])
+  @@map("payment_attempts")
+}

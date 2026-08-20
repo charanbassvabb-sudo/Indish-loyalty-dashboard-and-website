@@ -1,0 +1,33 @@
+{
+  "name": "Indish — Fire-Forward Indian Restaurant",
+  "short_name": "Indish",
+  "description": "Tandoor-fired, fusion-forward Indian cuisine at two branches in Zambia: EastPark Mall, Lusaka and Kitwe.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#16111c",
+  "theme_color": "#241a12",
+  "lang": "en-ZM",
+  "categories": ["food", "business"],
+  "icons": [
+    { "src": "/favicon-16x16.png", "sizes": "16x16", "type": "image/png" },
+    { "src": "/favicon-32x32.png", "sizes": "32x32", "type": "image/png" },
+    { "src": "/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Reserve a Table — Lusaka",
+      "url": "/lusaka/reserve",
+      "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Reserve a Table — Kitwe",
+      "url": "/kitwe/reserve",
+      "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
+    }
+  ]
+}

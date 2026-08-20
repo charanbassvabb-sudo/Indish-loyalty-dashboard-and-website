@@ -1,0 +1,393 @@
+@import url("https://fonts.googleapis.com/css2?family=Marcellus&family=Karla:ital,wght@0,300..800;1,300..800&display=swap");
+@import "tailwindcss" source(none);
+@source "./";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Design system definition.
+ *
+ * The @theme inline block maps CSS custom properties to Tailwind utility
+ * classes (e.g. --color-primary -> bg-primary, text-primary).
+ *
+ * The :root and .dark blocks define the actual color values using oklch.
+ * All colors MUST use oklch format.
+ *
+ * To add a new semantic color:
+ * 1. Add the variable to :root (light value) and .dark (dark value)
+ * 2. Register it in @theme inline as --color-<name>: var(--<name>)
+ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --font-display: "Marcellus", Georgia, serif;
+  --font-sans: "Karla", ui-sans-serif, system-ui, sans-serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-spice: var(--spice);
+  --color-saffron: var(--saffron);
+  --color-ember: var(--ember);
+  --color-cream: var(--cream);
+  --color-teal: var(--teal);
+  --color-gold: var(--gold);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  --radius: 0.75rem;
+
+  /* Indish — royal blue neon on near-black, brushed gold accents.
+     Matched to the "Indish" fork-and-spoon logo mark and the
+     charcoal / teal-velvet / brass interior of the restaurants. */
+  --background: oklch(0.145 0.019 264);
+  --foreground: oklch(0.96 0.012 90);
+  --card: oklch(0.195 0.024 264);
+  --card-foreground: oklch(0.96 0.012 90);
+  --popover: oklch(0.175 0.024 264);
+  --popover-foreground: oklch(0.96 0.012 90);
+  --primary: oklch(0.62 0.19 264);
+  --primary-foreground: oklch(0.98 0.008 90);
+  --secondary: oklch(0.29 0.045 220);
+  --secondary-foreground: oklch(0.96 0.012 90);
+  --muted: oklch(0.24 0.02 264);
+  --muted-foreground: oklch(0.68 0.025 260);
+  --accent: oklch(0.78 0.12 85);
+  --accent-foreground: oklch(0.19 0.03 85);
+  --destructive: oklch(0.58 0.2 25);
+  --destructive-foreground: oklch(0.97 0.01 85);
+  --border: oklch(0.31 0.028 264);
+  --input: oklch(0.27 0.028 264);
+  --ring: oklch(0.62 0.19 264);
+
+  --spice: oklch(0.46 0.18 264);
+  --saffron: oklch(0.78 0.12 85);
+  --ember: oklch(0.62 0.19 264);
+  --cream: oklch(0.96 0.012 90);
+  --teal: oklch(0.5 0.075 200);
+  --gold: oklch(0.78 0.12 85);
+
+  --gradient-ember: linear-gradient(135deg, oklch(0.58 0.2 268), oklch(0.78 0.12 85));
+  --gradient-veil: linear-gradient(
+    to top,
+    oklch(0.12 0.018 264 / 0.97) 5%,
+    oklch(0.12 0.018 264 / 0.78) 45%,
+    oklch(0.12 0.018 264 / 0.35) 100%
+  );
+  --shadow-warm: 0 24px 60px -26px oklch(0.62 0.19 264 / 0.5);
+  --shadow-lift: 0 18px 45px -24px oklch(0.03 0 0 / 0.88);
+
+  --chart-1: oklch(0.62 0.19 264);
+  --chart-2: oklch(0.78 0.12 85);
+  --chart-3: oklch(0.5 0.075 200);
+  --chart-4: oklch(0.68 0.14 150);
+  --chart-5: oklch(0.62 0.18 330);
+  --sidebar: oklch(0.175 0.024 264);
+  --sidebar-foreground: oklch(0.96 0.012 90);
+  --sidebar-primary: oklch(0.62 0.19 264);
+  --sidebar-primary-foreground: oklch(0.98 0.008 90);
+  --sidebar-accent: oklch(0.29 0.045 220);
+  --sidebar-accent-foreground: oklch(0.96 0.012 90);
+  --sidebar-border: oklch(0.31 0.028 264);
+  --sidebar-ring: oklch(0.62 0.19 264);
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: 0.005em;
+  }
+}
+
+@utility text-gradient-ember {
+  background: var(--gradient-ember);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility bg-gradient-ember {
+  background-image: var(--gradient-ember);
+}
+
+@utility bg-veil {
+  background-image: var(--gradient-veil);
+}
+
+@utility shadow-warm {
+  box-shadow: var(--shadow-warm);
+}
+
+@utility shadow-lift {
+  box-shadow: var(--shadow-lift);
+}
+
+@utility eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+}
+
+@utility card-warm {
+  background-color: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-lift);
+}
+
+@utility field {
+  width: 100%;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-input);
+  background-color: var(--color-background);
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: var(--color-foreground);
+  outline: none;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+
+  &:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-primary) 35%, transparent);
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility animate-rise {
+  animation: rise-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/*
+ * Ambient grain — a fixed, near-invisible noise layer for that "expensive
+ * menu" print feel. Pure CSS: an inline SVG feTurbulence data URI tiled
+ * across the viewport, blended softly over the page. Sits above content
+ * (z-index below overlays like modals/toasts) but never intercepts input.
+ */
+.ambient-grain {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/*
+ * Cursor-follow spotlight glow. A card opts in with `.spotlight-card` and
+ * updates --spot-x / --spot-y (0-100, set from JS on pointer move); the
+ * glow itself is a plain radial-gradient pseudo-element so it costs nothing
+ * when the card isn't hovered.
+ */
+.spotlight-card {
+  position: relative;
+  isolation: isolate;
+}
+
+.spotlight-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  background: radial-gradient(
+    320px circle at var(--spot-x, 50%) var(--spot-y, 50%),
+    color-mix(in oklch, var(--color-primary) 22%, transparent),
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+.spotlight-card:hover::after {
+  opacity: 1;
+}
+
+/*
+ * Google's embed map ships a plain light basemap; recolour it to sit inside
+ * the near-black, royal-blue-and-gold theme instead of reading as a bright
+ * rectangle dropped onto a dark page. Pure CSS: invert flips the light
+ * basemap dark, hue-rotate corrects the resulting colour shift, and a
+ * low-opacity colour-mix wash on top nudges the muted result toward the
+ * site's actual primary/gold palette.
+ */
+.map-frame iframe {
+  filter: invert(92%) hue-rotate(185deg) brightness(0.87) contrast(0.92) saturate(0.6);
+}
+
+.map-frame .map-tint {
+  background: linear-gradient(
+    160deg,
+    color-mix(in oklch, var(--color-primary) 20%, transparent),
+    color-mix(in oklch, var(--color-gold) 10%, transparent) 55%,
+    transparent
+  );
+  mix-blend-mode: soft-light;
+}
+
+/* Shimmering skeleton placeholder used while data/images load. */
+@keyframes skeleton-shimmer {
+  from {
+    background-position: 150% 0;
+  }
+  to {
+    background-position: -50% 0;
+  }
+}
+
+@utility skeleton {
+  border-radius: var(--radius-lg);
+  background-color: var(--color-muted);
+  background-image: linear-gradient(
+    100deg,
+    transparent 30%,
+    color-mix(in oklch, var(--color-foreground) 8%, transparent) 50%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
+}
+
+/* Slow-drifting ambient blobs behind admin surfaces — see AuroraBackground.tsx. */
+@keyframes aurora-drift-a {
+  0%, 100% { transform: translate(-8%, -6%) scale(1); }
+  50% { transform: translate(6%, 8%) scale(1.15); }
+}
+@keyframes aurora-drift-b {
+  0%, 100% { transform: translate(8%, 6%) scale(1.1); }
+  50% { transform: translate(-6%, -8%) scale(0.95); }
+}
+
+/* Shimmer sweep for premium CTAs — a diagonal highlight that crosses the
+   button on hover. Opt in with `.btn-shine`. */
+.btn-shine {
+  position: relative;
+  overflow: hidden;
+}
+.btn-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 40%,
+    color-mix(in oklch, white 55%, transparent) 50%,
+    transparent 60%
+  );
+  transform: translateX(-120%);
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.btn-shine:hover::after {
+  transform: translateX(120%);
+}
+
+/* Thin gold gradient rule for premium section dividers. */
+@utility divider-gold {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-gold) 50%, transparent);
+  opacity: 0.5;
+}
+
+/* Print-friendly menu: strip chrome, lay dishes out as a clean, dark-free
+   sheet a guest can actually take to the table or print at home. */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: #fff !important;
+    color: #111 !important;
+  }
+
+  main {
+    padding-top: 0 !important;
+  }
+
+  .card-warm {
+    box-shadow: none !important;
+    border-color: #ccc !important;
+    background: #fff !important;
+    break-inside: avoid;
+  }
+
+  .text-gradient-ember,
+  h1,
+  h2,
+  h3,
+  p,
+  span {
+    color: #111 !important;
+    -webkit-text-fill-color: #111 !important;
+  }
+}
+

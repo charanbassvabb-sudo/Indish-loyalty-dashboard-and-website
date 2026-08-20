@@ -1,0 +1,20 @@
+node_modules/
+dist/
+build/
+.output/
+.netlify/
+.tanstack/
+
+# Real secrets — every app in this project has its own .env with live
+# credentials (DB passwords, WhatsApp tokens, JWT secrets). Never commit these.
+.env
+.env.local
+.env.*.local
+
+*.log
+npm-debug.log*
+
+.DS_Store
+Thumbs.db
+
+*.tsbuildinfo

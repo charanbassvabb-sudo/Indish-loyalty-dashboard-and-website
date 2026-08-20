@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm uninstall *)",
+      "Bash(npx tsc *)",
+      "Bash(curl -s -X POST http://localhost:4000/api/reservations -H 'Content-Type: application/json' -d '{\"branch\":\"LUSAKA\",\"customerName\":\"Test User\",\"phone\":\"0977123456\",\"email\":\"test@example.com\",\"guests\":2,\"date\":\"2026-08-07\",\"time\":\"20:30\",\"paymentProvider\":\"AIRTEL_MONEY\",\"transactionId\":\"TX999999\"}')",
+      "Bash(powershell.exe -NoProfile -Command \"Get-NetTCPConnection -LocalPort 4000 -State Listen | Select-Object -ExpandProperty OwningProcess\")",
+      "Bash(powershell.exe -NoProfile -Command \"Stop-Process -Id 70552 -Force\")",
+      "Bash(npm run *)",
+      "Bash(curl -s -X POST http://localhost:4000/api/reservations -H 'Content-Type: application/json' -d '{\"branch\":\"LUSAKA\",\"customerName\":\"Test User\",\"phone\":\"0977123456\",\"email\":\"test@example.com\",\"guests\":2,\"date\":\"2026-08-07\",\"time\":\"20:30\",\"paymentProvider\":\"AIRTEL_MONEY\",\"transactionId\":\"TX888888\"}')",
+      "Bash(node _create_db.mjs)",
+      "Bash(node _verify.mjs)",
+      "Bash(rm _verify.mjs)",
+      "Bash(npx vite *)",
+      "Bash(curl -s -o /dev/null -w \"status: %{http_code}\\\\n\" http://localhost:8080/)",
+      "Bash(curl -sI http://localhost:8080/dashboard)",
+      "Bash(powershell.exe -NoProfile -Command \"Get-NetTCPConnection -LocalPort 4000 -State Listen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess\")",
+      "Bash(powershell.exe -NoProfile -Command \"Get-NetTCPConnection -LocalPort 5173 -State Listen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess\")",
+      "Bash(powershell.exe -NoProfile -Command \"Get-NetTCPConnection -LocalPort 8080 -State Listen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:4000/api/content)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5173/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:8080/)"
+    ]
+  }
+}

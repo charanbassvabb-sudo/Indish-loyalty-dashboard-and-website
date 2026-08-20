@@ -1,0 +1,1434 @@
+[
+  {
+    "id": "soups",
+    "label": "Soups",
+    "items": [
+      {
+        "id": "soups-tomato-soup",
+        "name": "Tomato Soup",
+        "price": 90,
+        "description": "Fresh tomato soup with classic summer-time flavours and bread croutons.",
+        "veg": true
+      },
+      {
+        "id": "soups-creamy-broccoli-soup",
+        "name": "Creamy Broccoli Soup",
+        "price": 100,
+        "description": "An all-time favourite — cream and broccoli puree.",
+        "veg": true
+      },
+      {
+        "id": "soups-sweet-corn-soup",
+        "name": "Sweet Corn Soup",
+        "price": 90,
+        "description": "Very classy and mild sweet corn broth.",
+        "veg": true
+      },
+      {
+        "id": "soups-lemon-coriander-soup",
+        "name": "Lemon Coriander Soup",
+        "price": 90,
+        "description": "Flavoured with lemon, coriander and diced vegetables.",
+        "veg": true
+      },
+      {
+        "id": "soups-manchao-soup",
+        "name": "Manchao Soup",
+        "price": 90,
+        "description": "All-time favourite Chinese-influenced soup.",
+        "veg": true
+      },
+      {
+        "id": "soups-burn-garlic-soup",
+        "name": "Burn Garlic Soup",
+        "price": 100,
+        "description": "Fresh ripe tomatoes with a bright red, tangy hot-garlic base.",
+        "veg": true
+      },
+      {
+        "id": "soups-veg-lemon-broth",
+        "name": "Veg. Lemon Broth",
+        "price": 90,
+        "description": "A very thin, delicate vegetable broth.",
+        "veg": true
+      },
+      {
+        "id": "soups-noodle-soup",
+        "name": "Noodle Soup",
+        "price": 90,
+        "description": "Very mild vegetable soup with noodles.",
+        "veg": true
+      },
+      {
+        "id": "soups-roasted-mushroom-soup",
+        "name": "Roasted Mushroom Soup",
+        "price": 100,
+        "description": "A delicious soup finished with cream, milk and mushroom.",
+        "veg": true
+      },
+      {
+        "id": "soups-chicken-chowder",
+        "name": "Chicken Chowder",
+        "price": 110,
+        "description": "A yummy soup loaded with chunks of veggies and chicken.",
+        "badges": [
+          "Most Ordered"
+        ]
+      },
+      {
+        "id": "soups-creamy-chicken-noodle-soup",
+        "name": "Creamy Chicken Noodle Soup",
+        "price": 110,
+        "description": "Fresh, creamy classic broth with noodles."
+      },
+      {
+        "id": "soups-brun-garlic-chicken-soup",
+        "name": "Brun Garlic Chicken Soup",
+        "price": 120,
+        "description": "Bright red, tangy hot-garlic base soup with chicken."
+      },
+      {
+        "id": "soups-chicken-manchao-soup",
+        "name": "Chicken Manchao Soup",
+        "price": 110,
+        "description": "All-time favourite Chinese-influenced chicken soup."
+      },
+      {
+        "id": "soups-lemon-chicken-broth",
+        "name": "Lemon Chicken Broth",
+        "price": 110,
+        "description": "A thin, delicate chicken broth with vegetables."
+      },
+      {
+        "id": "soups-chicken-sweet-corn-soup",
+        "name": "Chicken Sweet Corn Soup",
+        "price": 110,
+        "description": "Very classy and mild chicken and sweet corn soup."
+      },
+      {
+        "id": "soups-burn-garlic-prawn-soup",
+        "name": "Burn Garlic Prawn Soup",
+        "price": 145,
+        "description": "Bright red, tangy hot-garlic base soup with prawns.",
+        "badges": [
+          "Signature"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "veg-starters",
+    "label": "Starters — Veg",
+    "items": [
+      {
+        "id": "veg-starters-cheesy-fondue",
+        "name": "Cheesy Fondue",
+        "price": 220,
+        "description": "Delicious creamy, cheesy sauce served with exotic veggies and herbed bread.",
+        "badges": [
+          "Guest Favourite"
+        ],
+        "veg": true
+      },
+      {
+        "id": "veg-starters-india-ka-tandoori-platter",
+        "name": "India Ka Tandoori Platter",
+        "price": 350,
+        "description": "Amritsari paneer tikka, saffron paneer tikka, tandoori potato, mushroom, broccoli and seekh kebab.",
+        "badges": [
+          "Signature"
+        ],
+        "veg": true
+      },
+      {
+        "id": "veg-starters-amritsari-paneer-tikka",
+        "name": "Amritsari Paneer Tikka",
+        "price": 220,
+        "description": "Punjabi food embodies spices at their best — smoky charcoal-grilled cottage cheese.",
+        "veg": true
+      },
+      {
+        "id": "veg-starters-makhmali-paneer-tikka",
+        "name": "Makhmali Paneer Tikka",
+        "price": 220,
+        "description": "Mild, malai-flavoured paneer tikka served with coriander and mint sauce.",
+        "veg": true
+      },
+      {
+        "id": "veg-starters-paneer-haryali",
+        "name": "Paneer Haryali",
+        "price": 220,
+        "description": "Paneer marinated in a paste of cilantro and mint, cooked in the tandoor.",
+        "veg": true
+      },
+      {
+        "id": "veg-starters-paneer-lollipop",
+        "name": "Paneer Lollipop",
+        "price": 220,
+        "description": "Schezwan-marinated cottage cheese coated with poppadum, served with mayo.",
+        "badges": [
+          "Guest Favourite"
+        ],
+        "veg": true
+      },
+      {
+        "id": "veg-starters-stuff-paneer-kurkure",
+        "name": "Stuff Paneer Kurkure",
+        "price": 220,
+        "description": "Crisp-fried paneer with a delicious vegetable stuffing, served with schezwan sauce.",
+        "veg": true
+      },
+      {
+        "id": "veg-starters-rajasthani-papdi-veg",
+        "name": "Rajasthani Papdi Veg",
+        "price": 180,
+        "description": "Seasonal chopped vegetables and crunchy papad, finished with mint-mayo sauce.",
+        "veg": true
+      },
+      {
+        "id": "veg-starters-mexican-nachos",
+        "name": "Mexican Nachos",
+        "price": 180,
+        "description": "Crispy home-made tortilla chips with sour cream and salsa.",
+        "veg": true
+      },
+      {
+        "id": "veg-starters-mexican-quesadilla",
+        "name": "Mexican Quesadilla",
+        "price": 180,
+        "description": "Tortilla stuffed with peppers, kidney beans and cheese, served with salsa and sour cream.",
+        "veg": true
+      },
+      {
+        "id": "veg-starters-cheese-surprise",
+        "name": "Cheese Surprise",
+        "price": 180,
+        "description": "Chef's special cheesy mixture coated in breadcrumbs, served with paprika mayo.",
+        "veg": true
+      },
+      {
+        "id": "veg-starters-spinach-cheese",
+        "name": "Spinach & Cheese",
+        "price": 180,
+        "description": "A delicious mixture of spinach and cheese, served with hot sauce.",
+        "veg": true
+      },
+      {
+        "id": "veg-starters-jalape-o-corn-crackers",
+        "name": "Jalapeño Corn Crackers",
+        "price": 180,
+        "description": "Crunchy crackers with a spicy jalapeño kick, cheddar and sweet corn.",
+        "veg": true
+      },
+      {
+        "id": "veg-starters-mexican-bites",
+        "name": "Mexican Bites",
+        "price": 180,
+        "description": "Herb-flavoured potato and bell-pepper balls with salsa and sour cream.",
+        "veg": true
+      }
+    ]
+  },
+  {
+    "id": "non-veg-starters",
+    "label": "Starters — Non-Veg",
+    "items": [
+      {
+        "id": "non-veg-starters-roasted-tandoori-chicken",
+        "name": "Roasted Tandoori Chicken",
+        "price": 200,
+        "description": "Tandoori-marinated chicken cooked on charcoal, served with laccha onion and mint sauce. (Half — full 350 available)",
+        "badges": [
+          "Most Ordered"
+        ]
+      },
+      {
+        "id": "non-veg-starters-non-veg-tandoori-platter",
+        "name": "Non-Veg Tandoori Platter",
+        "price": 450,
+        "description": "Amritsari, saffron and makhmali chicken tikka, seekh kebab, tandoori chicken and ajwani prawns.",
+        "badges": [
+          "Signature"
+        ]
+      },
+      {
+        "id": "non-veg-starters-tiranga-chicken",
+        "name": "Tiranga Chicken",
+        "price": 300,
+        "description": "Chicken marinated in three different sauces, served with laccha onion."
+      },
+      {
+        "id": "non-veg-starters-chicken-tandoori-khazana",
+        "name": "Chicken Tandoori Khazana",
+        "price": 300,
+        "description": "Veggie- and cheese-stuffed baby kulcha topped with Amritsari chicken seekh kebab."
+      },
+      {
+        "id": "non-veg-starters-traditional-lamb-boti",
+        "name": "Traditional Lamb Boti",
+        "price": 300,
+        "description": "Slow-cooked dry lamb finished with Indish's special house spices."
+      },
+      {
+        "id": "non-veg-starters-amritsari-chicken-tikka",
+        "name": "Amritsari Chicken Tikka",
+        "price": 220,
+        "description": "Tandoori-marinated spicy chicken cooked on charcoal, served with mint sauce.",
+        "badges": [
+          "Guest Favourite"
+        ]
+      },
+      {
+        "id": "non-veg-starters-b-b-q-chicken-wings",
+        "name": "B.B.Q Chicken Wings",
+        "price": 200,
+        "description": "Marinated wings served with house hot sauce."
+      },
+      {
+        "id": "non-veg-starters-hot-garlic-chicken-lollipop",
+        "name": "Hot Garlic Chicken Lollipop",
+        "price": 225,
+        "description": "Fried chicken wings tossed in hot garlic sauce."
+      },
+      {
+        "id": "non-veg-starters-chicken-tangdi-kebab",
+        "name": "Chicken Tangdi Kebab",
+        "price": 250,
+        "description": "Tandoori-marinated drumsticks cooked on charcoal, served with chips."
+      },
+      {
+        "id": "non-veg-starters-cheese-baked-chicken",
+        "name": "Cheese Baked Chicken",
+        "price": 260,
+        "description": "Cheese chicken breast with a blend of cheddar and parmesan, buttery and crunchy."
+      },
+      {
+        "id": "non-veg-starters-chicken-haryali-tikka",
+        "name": "Chicken Haryali Tikka",
+        "price": 200,
+        "description": "A combination of spinach, coriander and mint-flavoured chicken tikka."
+      },
+      {
+        "id": "non-veg-starters-kebab-mahi",
+        "name": "Kebab Mahi",
+        "price": 270,
+        "description": "Grilled mahi fish served on skewers with vegetables."
+      },
+      {
+        "id": "non-veg-starters-fish-chips",
+        "name": "Fish & Chips",
+        "price": 250,
+        "description": "Fried fish served with masala chips."
+      },
+      {
+        "id": "non-veg-starters-amritsari-fried-fish",
+        "name": "Amritsari Fried Fish",
+        "price": 250,
+        "description": "Amritsari-marinated fish fillet, fried and served with mint sauce and chips."
+      },
+      {
+        "id": "non-veg-starters-hot-garlic-prawns",
+        "name": "Hot Garlic Prawns",
+        "price": 350,
+        "description": "Fried prawns served with hot garlic sauce."
+      },
+      {
+        "id": "non-veg-starters-ajwani-tandoori-prawns",
+        "name": "Ajwani Tandoori Prawns",
+        "price": 350,
+        "description": "Tandoori-marinated, ajwain-flavoured prawns."
+      },
+      {
+        "id": "non-veg-starters-kalimirch-prawn-tikka",
+        "name": "Kalimirch Prawn Tikka",
+        "price": 350,
+        "description": "Prawns cooked in the tandoor with cracked black pepper."
+      },
+      {
+        "id": "non-veg-starters-prawn-butter-garlic-tikka",
+        "name": "Prawn Butter Garlic Tikka",
+        "price": 350,
+        "description": "Prawns cooked in the tandoor with a garlic butter marinade.",
+        "badges": [
+          "Signature"
+        ]
+      },
+      {
+        "id": "non-veg-starters-indish-special-chicken-chips",
+        "name": "Indish Special Chicken & Chips",
+        "price": 225,
+        "description": "Indian-style marinated chicken coated in breadcrumbs, fried, served with chips and paprika mayo."
+      }
+    ]
+  },
+  {
+    "id": "veg-mains",
+    "label": "Mains — Veg",
+    "items": [
+      {
+        "id": "veg-mains-paneer-lababdar",
+        "name": "Paneer Lababdar",
+        "price": 200,
+        "description": "Superbly delicious cottage-cheese cubes in an aromatic, spicy onion gravy.",
+        "badges": [
+          "Most Ordered"
+        ],
+        "veg": true
+      },
+      {
+        "id": "veg-mains-paneer-maharaja",
+        "name": "Paneer Maharaja",
+        "price": 200,
+        "description": "Stuffed cottage cheese served with a creamy red gravy.",
+        "badges": [
+          "Signature"
+        ],
+        "veg": true
+      },
+      {
+        "id": "veg-mains-lasuni-palak-paneer",
+        "name": "Lasuni Palak Paneer",
+        "price": 200,
+        "description": "The nation's favourite — palak paneer tempered with fried garlic.",
+        "badges": [
+          "Guest Favourite"
+        ],
+        "veg": true
+      },
+      {
+        "id": "veg-mains-paneer-toofani",
+        "name": "Paneer Toofani",
+        "price": 225,
+        "description": "Cubes of paneer, mushroom and green peas in a spicy red gravy.",
+        "veg": true
+      },
+      {
+        "id": "veg-mains-paneer-kaju-masala",
+        "name": "Paneer Kaju Masala",
+        "price": 225,
+        "description": "Paneer in a rich cashew-nut gravy.",
+        "veg": true
+      },
+      {
+        "id": "veg-mains-kalimirch-paneer-pasanda",
+        "name": "Kalimirch Paneer Pasanda",
+        "price": 225,
+        "description": "Stuffed paneer pasanda finished with cracked black pepper.",
+        "veg": true
+      },
+      {
+        "id": "veg-mains-paneer-rara",
+        "name": "Paneer Rara",
+        "price": 225,
+        "description": "Paneer cooked with a minced-vegetable base in classic red gravy.",
+        "veg": true
+      },
+      {
+        "id": "veg-mains-paneer-takatak",
+        "name": "Paneer Takatak",
+        "price": 200,
+        "description": "Finger-sized cottage cheese tossed in a tangy red gravy.",
+        "veg": true
+      },
+      {
+        "id": "veg-mains-nizami-paneer",
+        "name": "Nizami Paneer",
+        "price": 225,
+        "description": "A rich, nawabi-style creamy paneer preparation.",
+        "veg": true
+      },
+      {
+        "id": "veg-mains-kolhapuri-dumpling",
+        "name": "Kolhapuri Dumpling",
+        "price": 220,
+        "description": "Kolhapuri paneer wada cooked in mild gravy and baked with cheese.",
+        "veg": true
+      },
+      {
+        "id": "veg-mains-cheesy-kofta-curry",
+        "name": "Cheesy Kofta Curry",
+        "price": 225,
+        "description": "Paneer and cheese kofta simmered in creamy gravy.",
+        "veg": true
+      },
+      {
+        "id": "veg-mains-veg-kofta-curry",
+        "name": "Veg. Kofta Curry",
+        "price": 180,
+        "description": "Vegetable dumplings simmered in a classic curry gravy.",
+        "veg": true
+      },
+      {
+        "id": "veg-mains-sabzi-e-mumtaj",
+        "name": "Sabzi-E-Mumtaj",
+        "price": 220,
+        "description": "A delicious red-and-yellow gravy served with vegetable tikkis.",
+        "veg": true
+      },
+      {
+        "id": "veg-mains-cashew-nut-masala",
+        "name": "Cashew Nut Masala",
+        "price": 250,
+        "description": "Golden-brown cashew nuts in a rich, creamy brown gravy.",
+        "veg": true
+      },
+      {
+        "id": "veg-mains-mughlai-shahi-korma",
+        "name": "Mughlai Shahi Korma",
+        "price": 200,
+        "description": "Vegetables cooked in a creamy onion gravy, topped with almond paste and nuts.",
+        "veg": true
+      },
+      {
+        "id": "veg-mains-amritsari-chole-bhature",
+        "name": "Amritsari Chole Bhature",
+        "price": 200,
+        "description": "Pindi chole served with two pieces of fried bhature.",
+        "badges": [
+          "Guest Favourite"
+        ],
+        "veg": true
+      },
+      {
+        "id": "veg-mains-veg-kolhapuri",
+        "name": "Veg. Kolhapuri",
+        "price": 180,
+        "description": "Mixed vegetables in a fiery Kolhapuri-style gravy.",
+        "veg": true
+      },
+      {
+        "id": "veg-mains-dum-aloo",
+        "name": "Dum Aloo",
+        "price": 180,
+        "description": "Baby potatoes slow-cooked in a spiced curry.",
+        "veg": true
+      },
+      {
+        "id": "veg-mains-aloo-capsicum-bhuna",
+        "name": "Aloo Capsicum Bhuna",
+        "price": 180,
+        "description": "Potato and bell pepper tossed in a dry, spiced masala.",
+        "veg": true
+      },
+      {
+        "id": "veg-mains-hyderabadi-kofta",
+        "name": "Hyderabadi Kofta",
+        "price": 180,
+        "description": "Vegetable balls fried and simmered in a spicy green gravy.",
+        "veg": true
+      }
+    ]
+  },
+  {
+    "id": "non-veg-mains",
+    "label": "Mains — Non-Veg",
+    "items": [
+      {
+        "id": "non-veg-mains-hand-pulled-butter-chicken",
+        "name": "Hand Pulled Butter Chicken",
+        "price": 225,
+        "description": "Pulled tandoori chicken in a rich tomato gravy, finished with plenty of butter.",
+        "badges": [
+          "Most Ordered"
+        ]
+      },
+      {
+        "id": "non-veg-mains-chicken-kadai",
+        "name": "Chicken Kadai",
+        "price": 225,
+        "description": "Chicken cooked in authentic Indian spices with bell pepper and diced onion."
+      },
+      {
+        "id": "non-veg-mains-chicken-maharaja",
+        "name": "Chicken Maharaja",
+        "price": 250,
+        "description": "Marinated chicken tikka in a very mild, red gravy."
+      },
+      {
+        "id": "non-veg-mains-nawabi-chicken",
+        "name": "Nawabi Chicken",
+        "price": 225,
+        "description": "Chicken cooked in a rich, creamy onion gravy."
+      },
+      {
+        "id": "non-veg-mains-chicken-malwani",
+        "name": "Chicken Malwani",
+        "price": 225,
+        "description": "Chicken cooked in fiery Malwani masala."
+      },
+      {
+        "id": "non-veg-mains-roast-chicken",
+        "name": "Roast Chicken",
+        "price": 250,
+        "description": "Marinated roast chicken served with vegetables, mash and mushroom sauce."
+      },
+      {
+        "id": "non-veg-mains-murg-hariyali",
+        "name": "Murg Hariyali",
+        "price": 225,
+        "description": "Green curry loaded with the flavour of spinach, coriander and mint."
+      },
+      {
+        "id": "non-veg-mains-creamy-pepper-chicken",
+        "name": "Creamy Pepper Chicken",
+        "price": 225,
+        "description": "Chicken in a creamy, cracked black-pepper sauce."
+      },
+      {
+        "id": "non-veg-mains-smokey-chicken-handi",
+        "name": "Smokey Chicken Handi",
+        "price": 250,
+        "description": "Chicken slow-cooked handi-style with a smoky finish."
+      },
+      {
+        "id": "non-veg-mains-chicken-patiala",
+        "name": "Chicken Patiala",
+        "price": 200,
+        "description": "A Punjabi-style rich chicken curry."
+      },
+      {
+        "id": "non-veg-mains-lamb-kadai",
+        "name": "Lamb Kadai",
+        "price": 280,
+        "description": "Authentic lamb curry finished with peshwari spice."
+      },
+      {
+        "id": "non-veg-mains-kashmiri-rogan-josh",
+        "name": "Kashmiri Rogan Josh",
+        "price": 280,
+        "description": "Traditional slow-cooked lamb curry.",
+        "badges": [
+          "Signature"
+        ]
+      },
+      {
+        "id": "non-veg-mains-lamb-sahi-korma",
+        "name": "Lamb Sahi-Korma",
+        "price": 280,
+        "description": "An aromatic, flavourful lamb korma in a creamy, mild gravy."
+      },
+      {
+        "id": "non-veg-mains-lamb-haryali",
+        "name": "Lamb Haryali",
+        "price": 280,
+        "description": "Green curry loaded with spinach, coriander, mint and mutton pieces."
+      },
+      {
+        "id": "non-veg-mains-roasted-lamb-shank",
+        "name": "Roasted Lamb Shank",
+        "price": 320,
+        "description": "Slow-cooked lamb shank in a delicious onion-creamy gravy.",
+        "badges": [
+          "Signature"
+        ]
+      },
+      {
+        "id": "non-veg-mains-lamb-stew",
+        "name": "Lamb Stew",
+        "price": 350,
+        "description": "Lamb stew served with brown sauce, mashed potato and seasonal vegetables."
+      },
+      {
+        "id": "non-veg-mains-lentil-goat-curry",
+        "name": "Lentil Goat Curry",
+        "price": 280,
+        "description": "A comforting combination of Indian lentils and mutton with warming spices."
+      },
+      {
+        "id": "non-veg-mains-fish-mollee",
+        "name": "Fish Mollee",
+        "price": 320,
+        "description": "Kerala-style fish cooked in a fragrant coconut gravy."
+      },
+      {
+        "id": "non-veg-mains-fish-chettinad",
+        "name": "Fish Chettinad",
+        "price": 320,
+        "description": "South Indian-style tangy coconut gravy with steamed fish."
+      },
+      {
+        "id": "non-veg-mains-grilled-fish",
+        "name": "Grilled Fish",
+        "price": 320,
+        "description": "Marinated grilled fish served with vegetables, mash and mushroom sauce."
+      },
+      {
+        "id": "non-veg-mains-prawn-molee",
+        "name": "Prawn Molee",
+        "price": 350,
+        "description": "Kerala-style prawns cooked in coconut gravy."
+      },
+      {
+        "id": "non-veg-mains-goan-prawn-curry",
+        "name": "Goan Prawn Curry",
+        "price": 350,
+        "description": "The perfect coconut-and-sour curry, Goan style."
+      },
+      {
+        "id": "non-veg-mains-prawn-tikka-masala",
+        "name": "Prawn Tikka Masala",
+        "price": 350,
+        "description": "Tandoori prawns in an aromatic, mildly creamy gravy."
+      },
+      {
+        "id": "non-veg-mains-boiled-eggs",
+        "name": "Boiled Eggs",
+        "price": 50,
+        "description": "Four pieces, simply boiled.",
+        "veg": true
+      },
+      {
+        "id": "non-veg-mains-fried-eggs-masala",
+        "name": "Fried Eggs Masala",
+        "price": 100,
+        "description": "Fried eggs tossed in masala — dry or gravy style.",
+        "veg": true
+      },
+      {
+        "id": "non-veg-mains-eggs-bhurji",
+        "name": "Eggs Bhurji",
+        "price": 100,
+        "description": "Scrambled eggs cooked with onion, tomato and spices.",
+        "veg": true
+      },
+      {
+        "id": "non-veg-mains-baked-kolhapuri-anda-gravy",
+        "name": "Baked Kolhapuri Anda Gravy",
+        "price": 180,
+        "description": "Eggs cooked in a spicy Kolhapuri gravy and baked with cheese.",
+        "veg": true
+      }
+    ]
+  },
+  {
+    "id": "indo-chinese",
+    "label": "Indo-Chinese",
+    "items": [
+      {
+        "id": "indo-chinese-chicken-manchurian",
+        "name": "Chicken Manchurian",
+        "price": 225,
+        "description": "Fried chicken tossed in a classic black-pepper Manchurian sauce.",
+        "badges": [
+          "Most Ordered"
+        ]
+      },
+      {
+        "id": "indo-chinese-chicken-chilli",
+        "name": "Chicken Chilli",
+        "price": 225,
+        "description": "All-time favourite fried chicken tossed in soya sauce with bell pepper and onion.",
+        "badges": [
+          "Guest Favourite"
+        ]
+      },
+      {
+        "id": "indo-chinese-chicken-hunan-sauce",
+        "name": "Chicken Hunan Sauce",
+        "price": 225,
+        "description": "Soft chicken tossed in a rich hunan sauce."
+      },
+      {
+        "id": "indo-chinese-green-thai-curry-chicken",
+        "name": "Green Thai Curry Chicken",
+        "price": 250,
+        "description": "Chicken specially cooked in a fragrant Thai green curry sauce."
+      },
+      {
+        "id": "indo-chinese-chicken-spring-rolls",
+        "name": "Chicken Spring Rolls",
+        "price": 200,
+        "description": "Stir-fried chicken tossed in soya sauce, rolled in a crisp spring-roll sheet."
+      },
+      {
+        "id": "indo-chinese-fish-chilli",
+        "name": "Fish Chilli",
+        "price": 250,
+        "description": "Fish tossed in a spicy chilli sauce."
+      },
+      {
+        "id": "indo-chinese-prawn-chilli",
+        "name": "Prawn Chilli",
+        "price": 350,
+        "description": "Fried prawns tossed with bell pepper and onion."
+      },
+      {
+        "id": "indo-chinese-masala-prawns-spring-rolls",
+        "name": "Masala Prawns Spring Rolls",
+        "price": 350,
+        "description": "Stir-fried prawns in seasoning and vegetables, rolled in a spring-roll sheet."
+      },
+      {
+        "id": "indo-chinese-egg-chilli",
+        "name": "Egg Chilli",
+        "price": 125,
+        "description": "Fried egg tossed with bell pepper and onion.",
+        "veg": true
+      },
+      {
+        "id": "indo-chinese-paneer-chilli",
+        "name": "Paneer Chilli",
+        "price": 200,
+        "description": "Fried paneer tossed with bell pepper in a dark soya sauce.",
+        "veg": true
+      },
+      {
+        "id": "indo-chinese-paneer-hunan",
+        "name": "Paneer Hunan",
+        "price": 200,
+        "description": "Cubes of cottage cheese tossed in Hunan sauce.",
+        "veg": true
+      },
+      {
+        "id": "indo-chinese-paneer-65",
+        "name": "Paneer 65",
+        "price": 200,
+        "description": "Desi-style tadka paneer with a South Indian 65 twist.",
+        "veg": true
+      },
+      {
+        "id": "indo-chinese-veg-manchurian",
+        "name": "Veg. Manchurian",
+        "price": 180,
+        "description": "Minced vegetable balls, deep-fried and tossed in soya chilli or hot garlic sauce.",
+        "veg": true
+      },
+      {
+        "id": "indo-chinese-tandoori-manchurian",
+        "name": "Tandoori Manchurian",
+        "price": 200,
+        "description": "Manchurian marinated in hot garlic sauce and finished in the tandoor.",
+        "veg": true
+      },
+      {
+        "id": "indo-chinese-veg-spring-roll",
+        "name": "Veg. Spring Roll",
+        "price": 180,
+        "description": "Stir-fried vegetables tossed in soya sauce, rolled in a crisp sheet.",
+        "veg": true
+      },
+      {
+        "id": "indo-chinese-thai-spring-roll",
+        "name": "Thai Spring Roll",
+        "price": 180,
+        "description": "Stir-fried vegetables in special Thai sauce, rolled in a crisp sheet.",
+        "veg": true
+      },
+      {
+        "id": "indo-chinese-chinese-bhel",
+        "name": "Chinese Bhel",
+        "price": 180,
+        "description": "An Indian twist on a Chinese-flavoured snack made with crispy noodles and veggies.",
+        "veg": true
+      }
+    ]
+  },
+  {
+    "id": "rice-noodles",
+    "label": "Rice & Noodles",
+    "items": [
+      {
+        "id": "rice-noodles-burnt-garlic-rice",
+        "name": "Burnt Garlic Rice",
+        "price": 125,
+        "description": "Wok-tossed rice in burnt garlic. Veg 125 / Chicken 150.",
+        "veg": true
+      },
+      {
+        "id": "rice-noodles-schezwan-fried-rice",
+        "name": "Schezwan Fried Rice",
+        "price": 125,
+        "description": "Fiery schezwan-tossed fried rice. Veg 125 / Chicken 150.",
+        "veg": true
+      },
+      {
+        "id": "rice-noodles-fried-rice",
+        "name": "Fried Rice",
+        "price": 110,
+        "description": "Classic wok-fried rice. Veg 110 / Chicken 135.",
+        "veg": true
+      },
+      {
+        "id": "rice-noodles-egg-fried-rice",
+        "name": "Egg Fried Rice",
+        "price": 125,
+        "description": "Fried rice tossed with scrambled egg.",
+        "veg": true
+      },
+      {
+        "id": "rice-noodles-triple-rice",
+        "name": "Triple Rice",
+        "price": 200,
+        "description": "Combination rice with hot-garlic gravy and crispy noodles. Veg 200 / Chicken 250.",
+        "badges": [
+          "Guest Favourite"
+        ],
+        "veg": true
+      },
+      {
+        "id": "rice-noodles-veg-pot-rice",
+        "name": "Veg. Pot Rice",
+        "price": 200,
+        "description": "Indish special pot rice served with a signature sauce.",
+        "veg": true
+      },
+      {
+        "id": "rice-noodles-chicken-pot-rice",
+        "name": "Chicken Pot Rice",
+        "price": 250,
+        "description": "Indish special pot rice served with a signature sauce.",
+        "badges": [
+          "Signature"
+        ]
+      },
+      {
+        "id": "rice-noodles-hakka-noodles",
+        "name": "Hakka Noodles",
+        "price": 150,
+        "description": "Classic stir-fried Hakka noodles. Veg 150 / Chicken 175.",
+        "veg": true
+      },
+      {
+        "id": "rice-noodles-stir-fry-schezwan-noodles",
+        "name": "Stir Fry Schezwan Noodles",
+        "price": 160,
+        "description": "Wok-tossed noodles in fiery schezwan sauce. Veg 160 / Chicken 185.",
+        "veg": true
+      },
+      {
+        "id": "rice-noodles-pad-thai-noodles",
+        "name": "Pad Thai Noodles",
+        "price": 200,
+        "description": "Thai-style stir-fried noodles. Veg 200 / Chicken 225.",
+        "veg": true
+      },
+      {
+        "id": "rice-noodles-schezwan-noodles-with-prawns",
+        "name": "Schezwan Noodles with Prawns",
+        "price": 350,
+        "description": "Tossed noodles with julienned vegetables and prawns in schezwan sauce."
+      },
+      {
+        "id": "rice-noodles-dan-dan-noodles",
+        "name": "Dan Dan Noodles",
+        "price": 225,
+        "description": "Sichuan-style noodles tossed with chicken."
+      }
+    ]
+  },
+  {
+    "id": "biryani-sizzlers",
+    "label": "Biryani, Rice Specials & Sizzlers",
+    "items": [
+      {
+        "id": "biryani-sizzlers-chicken-biryani",
+        "name": "Chicken Biryani",
+        "price": 250,
+        "description": "Basmati layered with marinated chicken and fried onion, dum-cooked.",
+        "badges": [
+          "Most Ordered"
+        ]
+      },
+      {
+        "id": "biryani-sizzlers-chicken-tikka-biryani",
+        "name": "Chicken Tikka Biryani",
+        "price": 265,
+        "description": "Basmati layered with smoky chicken tikka and fried onion."
+      },
+      {
+        "id": "biryani-sizzlers-mutton-biryani",
+        "name": "Mutton Biryani",
+        "price": 300,
+        "description": "Basmati layered with slow-cooked mutton, dum-sealed."
+      },
+      {
+        "id": "biryani-sizzlers-lamb-shank-biryani",
+        "name": "Lamb Shank Biryani",
+        "price": 350,
+        "description": "Tender lamb shank with authentic dum-cooked rice.",
+        "badges": [
+          "Signature"
+        ]
+      },
+      {
+        "id": "biryani-sizzlers-mountain-chicken-biryani",
+        "name": "Mountain Chicken Biryani",
+        "price": 300,
+        "description": "Tandoori chicken leg served with authentic rice preparation, cucumber and onion.",
+        "badges": [
+          "Signature"
+        ]
+      },
+      {
+        "id": "biryani-sizzlers-prawn-tikka-biryani",
+        "name": "Prawn Tikka Biryani",
+        "price": 350,
+        "description": "Basmati layered with tandoori prawn tikka."
+      },
+      {
+        "id": "biryani-sizzlers-veg-biryani",
+        "name": "Veg. Biryani",
+        "price": 180,
+        "description": "Basmati layered with seasonal vegetables and fried onion.",
+        "veg": true
+      },
+      {
+        "id": "biryani-sizzlers-paneer-tikka-biryani",
+        "name": "Paneer Tikka Biryani",
+        "price": 200,
+        "description": "Basmati layered with smoky paneer tikka.",
+        "veg": true
+      },
+      {
+        "id": "biryani-sizzlers-curd-rice",
+        "name": "Curd Rice",
+        "price": 150,
+        "description": "Comforting South Indian-style curd rice.",
+        "veg": true
+      },
+      {
+        "id": "biryani-sizzlers-kashmiri-pulav",
+        "name": "Kashmiri Pulav",
+        "price": 120,
+        "description": "Fragrant pulav with dried fruits and nuts.",
+        "veg": true
+      },
+      {
+        "id": "biryani-sizzlers-tava-pulav",
+        "name": "Tava Pulav",
+        "price": 120,
+        "description": "Griddle-cooked spiced rice pulav.",
+        "veg": true
+      },
+      {
+        "id": "biryani-sizzlers-veg-pulav",
+        "name": "Veg. Pulav",
+        "price": 120,
+        "description": "Rice pulav with mixed seasonal vegetables.",
+        "veg": true
+      },
+      {
+        "id": "biryani-sizzlers-steam-rice",
+        "name": "Steam Rice",
+        "price": 85,
+        "description": "Simple steamed basmati.",
+        "veg": true
+      },
+      {
+        "id": "biryani-sizzlers-jeera-rice",
+        "name": "Jeera Rice",
+        "price": 95,
+        "description": "Basmati tempered with roasted cumin.",
+        "veg": true
+      },
+      {
+        "id": "biryani-sizzlers-amritsari-laziz-sizzler",
+        "name": "Amritsari Laziz Sizzler",
+        "price": 300,
+        "description": "Tawa pulav, paneer tikka, tandoori potato and baby naan, sizzled at the table. Veg 300 / Non-Veg 350.",
+        "badges": [
+          "Signature"
+        ],
+        "veg": true
+      },
+      {
+        "id": "biryani-sizzlers-special-continental-sizzler",
+        "name": "Special Continental Sizzler",
+        "price": 300,
+        "description": "Creamy tomato pasta, cottage-cheese, grilled veggies and french fries. Veg 300 / Non-Veg 350.",
+        "veg": true
+      },
+      {
+        "id": "biryani-sizzlers-oriental-sizzler",
+        "name": "Oriental Sizzler",
+        "price": 300,
+        "description": "Combination rice, Manchurian, hot-garlic paneer and schezwan sauce. Veg 300 / Non-Veg 350.",
+        "veg": true
+      }
+    ]
+  },
+  {
+    "id": "dal",
+    "label": "Dal",
+    "items": [
+      {
+        "id": "dal-punjabi-dal-makhani",
+        "name": "Punjabi Dal Makhani",
+        "price": 165,
+        "description": "Black lentils and kidney beans, slow-simmered overnight with butter and cream.",
+        "badges": [
+          "Guest Favourite"
+        ],
+        "veg": true
+      },
+      {
+        "id": "dal-tadke-wali-dal",
+        "name": "Tadke Wali Dal",
+        "price": 150,
+        "description": "Yellow lentils finished with a fragrant tempering of garlic and spices.",
+        "veg": true
+      },
+      {
+        "id": "dal-spicy-dal-achari",
+        "name": "Spicy Dal Achari",
+        "price": 150,
+        "description": "Lentils tempered with pickling spices for a tangy kick.",
+        "veg": true
+      },
+      {
+        "id": "dal-dal-khichdi-with-fried-garlic",
+        "name": "Dal Khichdi with Fried Garlic",
+        "price": 180,
+        "description": "Comforting rice-and-lentil khichdi finished with crisp fried garlic.",
+        "veg": true
+      }
+    ]
+  },
+  {
+    "id": "breads",
+    "label": "Breads & Poppadums",
+    "items": [
+      {
+        "id": "breads-tandoori-roti",
+        "name": "Tandoori Roti",
+        "price": 30,
+        "description": "Whole-wheat bread baked in the clay tandoor.",
+        "veg": true
+      },
+      {
+        "id": "breads-plain-naan",
+        "name": "Plain Naan",
+        "price": 35,
+        "description": "Classic leavened tandoor bread.",
+        "veg": true
+      },
+      {
+        "id": "breads-garlic-naan",
+        "name": "Garlic Naan",
+        "price": 50,
+        "description": "Tandoor-baked naan brushed with roasted garlic.",
+        "badges": [
+          "Most Ordered"
+        ],
+        "veg": true
+      },
+      {
+        "id": "breads-chilly-garlic-naan",
+        "name": "Chilly Garlic Naan",
+        "price": 55,
+        "description": "Garlic naan with a spicy chilli kick.",
+        "veg": true
+      },
+      {
+        "id": "breads-cheese-naan",
+        "name": "Cheese Naan",
+        "price": 110,
+        "description": "Naan stuffed with melted cheese.",
+        "veg": true
+      },
+      {
+        "id": "breads-jalapeno-cheese-kulcha",
+        "name": "Jalapeno Cheese Kulcha",
+        "price": 110,
+        "description": "Kulcha stuffed with cheese and jalapeño.",
+        "veg": true
+      },
+      {
+        "id": "breads-stuffed-aloo-kulcha",
+        "name": "Stuffed Aloo Kulcha",
+        "price": 75,
+        "description": "Leavened bread stuffed with spiced mashed potato.",
+        "veg": true
+      },
+      {
+        "id": "breads-paneer-kulcha",
+        "name": "Paneer Kulcha",
+        "price": 110,
+        "description": "Kulcha stuffed with spiced cottage cheese.",
+        "veg": true
+      },
+      {
+        "id": "breads-plain-lachha-paratha",
+        "name": "Plain Lachha Paratha",
+        "price": 45,
+        "description": "Multi-layered whole-wheat flatbread, crisped on the tawa.",
+        "veg": true
+      },
+      {
+        "id": "breads-stuffed-paneer-paratha",
+        "name": "Stuffed Paneer Paratha",
+        "price": 100,
+        "description": "Layered paratha stuffed with spiced paneer.",
+        "veg": true
+      },
+      {
+        "id": "breads-mix-veg-stuffed-paratha",
+        "name": "Mix Veg. Stuffed Paratha",
+        "price": 80,
+        "description": "Layered paratha stuffed with mixed vegetables.",
+        "veg": true
+      },
+      {
+        "id": "breads-roti-basket-assorted-7pcs",
+        "name": "Roti Basket (Assorted, 7pcs)",
+        "price": 250,
+        "description": "A chef's selection of seven assorted breads.",
+        "badges": [
+          "Signature"
+        ],
+        "veg": true
+      },
+      {
+        "id": "breads-delhi-belly-papad",
+        "name": "Delhi Belly Papad",
+        "price": 55,
+        "description": "Rice papad topped with spicy kuchumber and coriander.",
+        "veg": true
+      },
+      {
+        "id": "breads-amritsari-kadak-rumali-roti",
+        "name": "Amritsari Kadak Rumali Roti",
+        "price": 125,
+        "description": "Large papad topped with tomato, cucumber, onion and a sprinkle of masala.",
+        "veg": true
+      },
+      {
+        "id": "breads-amritsari-chicken-tikka-rumali-roti",
+        "name": "Amritsari Chicken Tikka Rumali Roti",
+        "price": 150,
+        "description": "Large papad topped with diced chicken tikka, cucumber and onion."
+      },
+      {
+        "id": "breads-roasted-papad-masala",
+        "name": "Roasted Papad Masala",
+        "price": 50,
+        "description": "Roasted papad finished with a masala topping.",
+        "veg": true
+      },
+      {
+        "id": "breads-veg-boondi-raita",
+        "name": "Veg. / Boondi Raita",
+        "price": 90,
+        "description": "Whisked yoghurt with vegetables or crisp boondi.",
+        "veg": true
+      }
+    ]
+  },
+  {
+    "id": "salads",
+    "label": "Salads",
+    "items": [
+      {
+        "id": "salads-greek-salad",
+        "name": "Greek Salad",
+        "price": 150,
+        "description": "Diced vegetables tossed in a classic Greek dressing.",
+        "veg": true
+      },
+      {
+        "id": "salads-bar-salad",
+        "name": "Bar Salad",
+        "price": 95,
+        "description": "A light, crunchy house salad.",
+        "veg": true
+      },
+      {
+        "id": "salads-grill-veggies",
+        "name": "Grill Veggies",
+        "price": 105,
+        "description": "Char-grilled seasonal vegetables.",
+        "veg": true
+      },
+      {
+        "id": "salads-green-salad",
+        "name": "Green Salad",
+        "price": 100,
+        "description": "An all-time favourite fresh green salad.",
+        "veg": true
+      },
+      {
+        "id": "salads-russian-salad",
+        "name": "Russian Salad",
+        "price": 125,
+        "description": "Diced vegetables tossed in creamy mayo.",
+        "veg": true
+      },
+      {
+        "id": "salads-coleslaw-salad",
+        "name": "Coleslaw Salad",
+        "price": 125,
+        "description": "Crisp shredded cabbage and carrot in a creamy dressing.",
+        "veg": true
+      },
+      {
+        "id": "salads-masala-peanuts",
+        "name": "Masala Peanuts",
+        "price": 95,
+        "description": "Spiced, crunchy roasted peanuts.",
+        "veg": true
+      },
+      {
+        "id": "salads-chicken-tikka-salad",
+        "name": "Chicken Tikka Salad",
+        "price": 200,
+        "description": "Iceberg lettuce, croutons and cheese with Caesar dressing and chicken tikka.",
+        "badges": [
+          "Guest Favourite"
+        ]
+      },
+      {
+        "id": "salads-grilled-chicken-salad",
+        "name": "Grilled Chicken Salad",
+        "price": 200,
+        "description": "Iceberg lettuce, grilled chicken and vegetables with chilli mayo."
+      }
+    ]
+  },
+  {
+    "id": "pastas-fastfood",
+    "label": "Pastas & Fast Food",
+    "items": [
+      {
+        "id": "pastas-fastfood-baked-macaroni-cheese-pasta",
+        "name": "Baked Macaroni & Cheese Pasta",
+        "price": 200,
+        "description": "Oven-baked macaroni in a rich cheese sauce. Veg 200 / Chicken 250.",
+        "veg": true
+      },
+      {
+        "id": "pastas-fastfood-penne-in-creamy-tomato-sauce",
+        "name": "Penne in Creamy Tomato Sauce",
+        "price": 200,
+        "description": "Penne pasta in a silky tomato cream sauce. Veg 200 / Chicken 250.",
+        "veg": true
+      },
+      {
+        "id": "pastas-fastfood-penne-in-creamy-cheesy-sauce",
+        "name": "Penne in Creamy Cheesy Sauce",
+        "price": 200,
+        "description": "Penne pasta in a rich, cheesy cream sauce. Veg 200 / Chicken 250.",
+        "veg": true
+      },
+      {
+        "id": "pastas-fastfood-pasta-in-arrabbiata-sauce",
+        "name": "Pasta in Arrabbiata Sauce",
+        "price": 200,
+        "description": "Penne pasta in a spicy tomato arrabbiata sauce. Veg 200 / Chicken 250.",
+        "veg": true
+      },
+      {
+        "id": "pastas-fastfood-delicious-cheesy-chicken-sandwich",
+        "name": "Delicious Cheesy Chicken Sandwich",
+        "price": 120,
+        "description": "Indian-fusion chicken strips with melted cheese."
+      },
+      {
+        "id": "pastas-fastfood-roasted-chicken-sandwich",
+        "name": "Roasted Chicken Sandwich",
+        "price": 120,
+        "description": "Sliced grilled chicken, tomato and cheese."
+      },
+      {
+        "id": "pastas-fastfood-veggie-cheesy-grill-sandwich",
+        "name": "Veggie Cheesy Grill Sandwich",
+        "price": 100,
+        "description": "Grilled sandwich with sliced vegetables and cheese.",
+        "veg": true
+      },
+      {
+        "id": "pastas-fastfood-cheese-chilly-toast",
+        "name": "Cheese Chilly Toast",
+        "price": 120,
+        "description": "Chef's special cheesy chilli mixture on toasted bread.",
+        "veg": true
+      },
+      {
+        "id": "pastas-fastfood-masala-fries",
+        "name": "Masala Fries",
+        "price": 100,
+        "description": "House fries tossed in Indish's special masala.",
+        "badges": [
+          "Most Ordered"
+        ],
+        "veg": true
+      },
+      {
+        "id": "pastas-fastfood-american-chicken-fries",
+        "name": "American Chicken Fries",
+        "price": 150,
+        "description": "Loaded fries topped with cheesy sauce and shredded chicken."
+      },
+      {
+        "id": "pastas-fastfood-italian-herb-loaded-fries",
+        "name": "Italian Herb Loaded Fries",
+        "price": 125,
+        "description": "Fries loaded with herbs, tomato sauce and cheese.",
+        "veg": true
+      }
+    ]
+  },
+  {
+    "id": "desserts",
+    "label": "Desserts & Waffles",
+    "items": [
+      {
+        "id": "desserts-indish-special-treat",
+        "name": "Indish Special Treat",
+        "price": 180,
+        "description": "Three types of ice cream topped with chocolate brownie, nuts, chopped fruit, whipped cream and chocolate sauce.",
+        "badges": [
+          "Signature"
+        ],
+        "veg": true
+      },
+      {
+        "id": "desserts-sizzling-brownie-with-ice-cream",
+        "name": "Sizzling Brownie with Ice Cream",
+        "price": 150,
+        "description": "Warm brownie served sizzling with vanilla ice cream.",
+        "badges": [
+          "Guest Favourite"
+        ],
+        "veg": true
+      },
+      {
+        "id": "desserts-sizzling-brownie-hot-chocolate-sauce",
+        "name": "Sizzling Brownie, Hot Chocolate Sauce",
+        "price": 125,
+        "description": "Warm brownie finished with hot chocolate sauce.",
+        "veg": true
+      },
+      {
+        "id": "desserts-gulab-jamun-2pc",
+        "name": "Gulab Jamun (2pc)",
+        "price": 60,
+        "description": "Classic soft milk dumplings soaked in rose-cardamom syrup.",
+        "veg": true
+      },
+      {
+        "id": "desserts-ice-cream-3-scoops",
+        "name": "Ice Cream (3 scoops)",
+        "price": 100,
+        "description": "Ask your server for today's flavours.",
+        "veg": true
+      },
+      {
+        "id": "desserts-overload-waffles",
+        "name": "Overload Waffles",
+        "price": 180,
+        "description": "Waffle topped with chocolate ganache, sprinkles and vanilla ice cream.",
+        "veg": true
+      },
+      {
+        "id": "desserts-nutella-waffles",
+        "name": "Nutella Waffles",
+        "price": 200,
+        "description": "Waffles with Nutella, fresh banana, vanilla ice cream and sprinkles.",
+        "badges": [
+          "Most Ordered"
+        ],
+        "veg": true
+      }
+    ]
+  }
+]
