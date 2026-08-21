@@ -188,8 +188,11 @@ export async function sendRegistrationNotifications(payload: RegistrationNotific
  * unlock your reward!") got auto-reclassified from UTILITY to MARKETING
  * by Meta's template reviewer despite being submitted as UTILITY, which
  * defeats the point (a MARKETING template can be blocked by a customer's
- * marketing opt-out). Kept neutral here to give the resubmission the best
- * chance of actually staying UTILITY.
+ * marketing opt-out). This neutral reword was resubmitted hoping to land
+ * UTILITY instead — Meta approved it anyway, but still under MARKETING.
+ * Kept as-is rather than fighting the classification further; just means
+ * this send is subject to Meta's opt-out/quality-rating rules for
+ * marketing traffic that a true UTILITY template wouldn't be.
  */
 function visitProgressClause(p: VisitProgressNotificationPayload): string {
   const remaining = p.rewardVisit - p.visitCount;
@@ -208,13 +211,13 @@ function formatVisitProgressMessage(p: VisitProgressNotificationPayload): string
 
 /**
  * Notifies a customer after a visit is logged (addVisitFn) — separate from
- * registration, which already covers their very first visit. Not yet wired
- * to a template: loyalty_visit_update_v2 was submitted to Meta for approval
- * (UTILITY — see visitProgressClause() above for why it's "_v2" and why the
- * wording is deliberately neutral) but is still PENDING as of writing.
- * Until WHATSAPP_VISIT_UPDATE_TEMPLATE_NAME is set, this only actually
- * delivers within an open 24h session — fine for testing, not for real
- * customers who haven't messaged the business first.
+ * registration, which already covers their very first visit. Now wired to
+ * loyalty_visit_update_v2 (approved, MARKETING — see visitProgressClause()
+ * above for the "_v2"/classification history) via
+ * WHATSAPP_VISIT_UPDATE_TEMPLATE_NAME in production. If that env var isn't
+ * set (e.g. a fresh local checkout), this falls back to a free-text send,
+ * which only actually delivers within an open 24h session — fine for
+ * testing, not for real customers who haven't messaged the business first.
  */
 export async function sendVisitProgressNotification(payload: VisitProgressNotificationPayload) {
   const templateName = process.env.WHATSAPP_VISIT_UPDATE_TEMPLATE_NAME;
