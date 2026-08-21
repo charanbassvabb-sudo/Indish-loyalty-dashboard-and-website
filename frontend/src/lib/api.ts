@@ -12,6 +12,21 @@ export class ApiRequestError extends Error {
   }
 }
 
+/**
+ * The backend's Zod validation-error responses shape `details` as
+ * `{ error: "Validation failed", details: { fieldName: ["reason", ...] } }`
+ * (see errorHandler.ts) — the top-level `error` string alone is just the
+ * generic "Validation failed", which isn't useful to show a customer.
+ * Pull the actual field-level reason(s) out when present.
+ */
+function extractValidationMessage(details: unknown): string | null {
+  if (!details || typeof details !== "object") return null;
+  const messages = Object.values(details as Record<string, unknown>)
+    .flat()
+    .filter((v): v is string => typeof v === "string" && v.length > 0);
+  return messages.length > 0 ? messages.join(" ") : null;
+}
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   // A FormData body (file uploads) must NOT get an explicit Content-Type —
   // the browser sets its own `multipart/form-data; boundary=...` from the
@@ -32,7 +47,8 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const body = isJson ? await res.json().catch(() => null) : null;
 
   if (!res.ok) {
-    throw new ApiRequestError(res.status, body?.error ?? res.statusText, body?.details);
+    const message = extractValidationMessage(body?.details) ?? body?.error ?? res.statusText;
+    throw new ApiRequestError(res.status, message, body?.details);
   }
 
   return body as T;

@@ -66,8 +66,15 @@ export const MAX_ADVANCE_HOURS = 24;
 
 export type SlotAvailability = "bookable" | "past" | "too-far";
 
+// Time slots are always restaurant-local (Africa/Lusaka, UTC+2, no DST)
+// wall-clock values, not the visitor's own browser timezone — someone
+// booking from outside Zambia would otherwise have "17:30" silently
+// reinterpreted as 17:30 in their own timezone. The explicit "+02:00"
+// keeps this in lockstep with the identical fix on the backend
+// (isWithinBookingWindow in validators/reservation.validator.ts), which
+// runs on a UTC server and had the same bug the other direction.
 export function getSlotAvailability(date: string, time: string): SlotAvailability {
-  const target = new Date(`${date}T${time}:00`);
+  const target = new Date(`${date}T${time}:00+02:00`);
   const now = new Date();
   const maxDate = new Date(now.getTime() + MAX_ADVANCE_HOURS * 60 * 60 * 1000);
   if (target < now) return "past";

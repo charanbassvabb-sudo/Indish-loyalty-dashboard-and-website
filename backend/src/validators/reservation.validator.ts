@@ -19,8 +19,16 @@ export const seatingSchema = z.enum(["INDOOR", "OUTDOOR", "NO_PREFERENCE"]);
 // from right now — no booking further out than that, and nothing already past.
 export const MAX_ADVANCE_HOURS = 24;
 
+// The date/time strings are always restaurant-local (Africa/Lusaka, UTC+2,
+// no DST) wall-clock values — never the server's own timezone. The server
+// runs in UTC, so parsing "2026-08-22T13:30:00" without an explicit offset
+// would silently treat it as 13:30 UTC (15:30 Lusaka) instead of the
+// intended 13:30 Lusaka (11:30 UTC), a 2-hour drift that's enough to push
+// a genuinely-within-24h booking outside this window right near the edge.
+// The explicit "+02:00" makes this deterministic regardless of the
+// runtime's TZ, matching the identical fix on the frontend (data/reservation.ts).
 function isWithinBookingWindow(date: string, time: string) {
-  const target = new Date(`${date}T${time}:00`);
+  const target = new Date(`${date}T${time}:00+02:00`);
   const now = new Date();
   const maxDate = new Date(now.getTime() + MAX_ADVANCE_HOURS * 60 * 60 * 1000);
   return target >= now && target <= maxDate;
