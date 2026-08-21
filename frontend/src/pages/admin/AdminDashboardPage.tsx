@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { LogOut, CalendarCheck2, BarChart3, ClipboardList, PenSquare, ExternalLink, CreditCard, UtensilsCrossed } from "lucide-react";
+import { LogOut, CalendarCheck2, BarChart3, ClipboardList, PenSquare, ExternalLink, CreditCard, UtensilsCrossed, KeyRound } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAdminAuth } from "@/context/AdminAuthContext";
@@ -14,6 +14,7 @@ import { AdminContentTab } from "./tabs/AdminContentTab";
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 import { AuroraBackground } from "@/components/ui/AuroraBackground";
 import { AdminClock } from "@/components/admin/AdminClock";
+import { ChangePasswordModal } from "@/components/admin/ChangePasswordModal";
 import logo from "@/assets/images/logo.png";
 
 type Tab = "reservations" | "payments" | "menu" | "reports" | "availability" | "content";
@@ -40,6 +41,7 @@ function initials(name: string) {
 export default function AdminDashboardPage() {
   const { admin, logout } = useAdminAuth();
   const [tab, setTab] = useState<Tab>(initialTab);
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
   useDocumentMeta({ title: "Admin Dashboard | Indish", noindex: true });
 
   // Bookings sit as PENDING_PAYMENT until a staff member checks the deposit
@@ -128,6 +130,15 @@ export default function AdminDashboardPage() {
             </div>
 
             <button
+              onClick={() => setChangePasswordOpen(true)}
+              aria-label="Change password"
+              className="flex items-center gap-1.5 rounded-full border border-border p-2.5 text-muted-foreground transition-colors hover:border-primary hover:text-primary sm:px-4 sm:py-2"
+            >
+              <KeyRound className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Change Password</span>
+            </button>
+
+            <button
               onClick={() => logout()}
               aria-label="Sign out"
               className="flex items-center gap-1.5 rounded-full border border-border p-2.5 text-muted-foreground transition-colors hover:border-destructive hover:text-destructive sm:px-4 sm:py-2"
@@ -137,6 +148,8 @@ export default function AdminDashboardPage() {
             </button>
           </div>
         </div>
+
+        <ChangePasswordModal open={changePasswordOpen} onClose={() => setChangePasswordOpen(false)} />
 
         <nav className="mx-auto flex max-w-7xl gap-1 overflow-x-auto px-6 md:px-10" aria-label="Admin sections">
           {TABS.map((t) => (

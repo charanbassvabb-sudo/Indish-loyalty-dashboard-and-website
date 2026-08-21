@@ -1,5 +1,6 @@
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import { motion } from "framer-motion";
+import { useState } from "react";
 import {
   LayoutDashboard,
   Users,
@@ -11,6 +12,7 @@ import {
   BarChart3,
   LogOut,
   ExternalLink,
+  KeyRound,
 } from "lucide-react";
 import {
   Sidebar,
@@ -25,6 +27,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { IndishWordmark } from "@/components/indish-logo";
+import { ChangePasswordDialog } from "@/components/change-password-dialog";
 import { logoutFn } from "@/lib/functions";
 import { RESTAURANT_ADMIN_URL } from "@/lib/restaurant";
 import type { Staff } from "@/lib/types";
@@ -47,6 +50,7 @@ export function AppSidebar({ staff }: { staff: Staff }) {
   const path = useRouterState({ select: (r) => r.location.pathname });
   const router = useRouter();
   const isActive = (url: string) => path === url || path.startsWith(url + "/");
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
 
   async function handleLogout(e: React.MouseEvent) {
     e.preventDefault();
@@ -143,6 +147,12 @@ export function AppSidebar({ staff }: { staff: Staff }) {
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
+            <SidebarMenuButton onClick={() => setChangePasswordOpen(true)} className="text-muted-foreground">
+              <KeyRound className="h-4 w-4" />
+              <span>Change password</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
             <SidebarMenuButton asChild>
               <a
                 href="/login"
@@ -156,6 +166,7 @@ export function AppSidebar({ staff }: { staff: Staff }) {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
+      <ChangePasswordDialog open={changePasswordOpen} onOpenChange={setChangePasswordOpen} />
     </Sidebar>
   );
 }

@@ -77,6 +77,29 @@ export const logoutFn = createServerFn({ method: "POST" }).handler(async () => {
   deleteCookie(SESSION_COOKIE, { path: "/" });
 });
 
+/**
+ * Self-service password change — requires the current password, unlike
+ * updateStaffFn's "Reset password" field below (manager-only, doesn't check
+ * the old password, meant for a manager resetting someone else's login).
+ */
+export const changeMyPasswordFn = createServerFn({ method: "POST" })
+  .validator((data: { currentPassword: string; newPassword: string }) => data)
+  .handler(async ({ data }) => {
+    const staff = await requireStaff();
+    const [rows] = await pool.query<StaffRow[]>("SELECT * FROM staff WHERE id = ?", [staff.id]);
+    const row = rows[0];
+    if (!row) throw new Error("Not signed in");
+
+    const ok = await bcrypt.compare(data.currentPassword, row.password_hash);
+    if (!ok) throw new Error("Current password is incorrect");
+
+    if (data.newPassword.length < 8) throw new Error("New password must be at least 8 characters");
+
+    const passwordHash = await bcrypt.hash(data.newPassword, 10);
+    await pool.query("UPDATE staff SET password_hash = ? WHERE id = ?", [passwordHash, staff.id]);
+    invalidateStaffCache();
+  });
+
 // -------------------------------------------------------------- branch ----
 
 export const getSelectedBranchFn = createServerFn({ method: "GET" }).handler(async () => {
