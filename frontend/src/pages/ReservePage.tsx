@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { branches } from "@/data/branches";
-import { emptyReservationForm, isSlotBookable, MAX_ADVANCE_HOURS } from "@/data/reservation";
+import { emptyReservationForm, isSlotBookable, isLusakaRecurringClosure, MAX_ADVANCE_HOURS } from "@/data/reservation";
 import type { ReservationFormData } from "@/data/reservation";
 import { ReservationDetailsStep } from "@/components/reservation/ReservationDetailsStep";
 import { ReservationPaymentStep, type PaymentUploadResult } from "@/components/reservation/ReservationPaymentStep";
@@ -27,15 +27,17 @@ interface CreatedBooking {
   depositAmount: number;
 }
 
-function validateDetails(data: ReservationFormData): Errors {
+function validateDetails(data: ReservationFormData, branchId: BranchId): Errors {
   const errors: Errors = {};
   if (data.customerName.trim().length < 2) errors.customerName = "Name must be at least 2 characters";
   if (data.phone.replace(/\D/g, "").length < 9) errors.phone = "Phone must have at least 9 digits";
   if (!/^\S+@\S+\.\S+$/.test(data.email.trim())) errors.email = "Enter a valid email address";
   if (!data.date) errors.date = "Date is required";
   if (!data.time) errors.time = "Please select a time";
-  if (data.date && data.time && !isSlotBookable(data.date, data.time)) {
-    errors.date = `Reservations can only be made up to ${MAX_ADVANCE_HOURS} hours in advance`;
+  if (data.date && data.time && !isSlotBookable(data.date, data.time, branchId)) {
+    errors.date = isLusakaRecurringClosure(data.date, branchId)
+      ? "We're closed on the 2nd and 3rd Monday of the month — please pick another date"
+      : `Reservations can only be made up to ${MAX_ADVANCE_HOURS} hours in advance`;
   }
   if (data.guests < 1 || data.guests > 40) errors.guests = "Guests must be between 1 and 40";
   return errors;
@@ -70,7 +72,7 @@ export default function ReservePage() {
   // is a genuinely separate step against an already-existing booking (see
   // ReservationPaymentStep.tsx), not bundled into the same request anymore.
   async function goToPayment() {
-    const detailErrors = validateDetails(data);
+    const detailErrors = validateDetails(data, branch!.id);
     setErrors(detailErrors);
     if (Object.keys(detailErrors).length > 0) return;
 

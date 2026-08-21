@@ -27,7 +27,7 @@ const FAQ_RULES: { test: (text: string) => boolean; reply: string }[] = [
   {
     test: (t) => /\bbranch|location|where|address\b/.test(t),
     reply:
-      "We have two branches:\n📍 Lusaka — Shop No. K72, East Park Mall, next to Game Zone\n📍 Kitwe — Shop No. 32, ECL Mall, Block B / Unit 10, next to Sikale Wood, Parklands",
+      "We have two branches:\n📍 Lusaka — Shop No. 10, East Park Mall, next to Sikale Deco\n📍 Kitwe — Shop No. 32, ECL Mall, Block B / Unit 10, next to Sikale Wood, Parklands",
   },
   {
     test: (t) => /\bmenu|food|dish|eat\b/.test(t),

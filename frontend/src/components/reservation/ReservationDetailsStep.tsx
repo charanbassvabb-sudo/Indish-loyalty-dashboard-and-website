@@ -25,7 +25,7 @@ export function ReservationDetailsStep({ branch, data, errors, onChange, onNext,
   // If the chosen date changes and the previously picked time falls outside
   // the 24h booking window for that date, clear it so the user has to re-pick.
   useEffect(() => {
-    if (data.date && data.time && !isSlotBookable(data.date, data.time)) {
+    if (data.date && data.time && !isSlotBookable(data.date, data.time, branch.id)) {
       onChange("time", "");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -140,13 +140,14 @@ export function ReservationDetailsStep({ branch, data, errors, onChange, onNext,
           >
             <option value="">Select a time</option>
             {TIME_SLOTS.map((t) => {
-              const availability = data.date ? getSlotAvailability(data.date, t) : "bookable";
+              const availability = data.date ? getSlotAvailability(data.date, t, branch.id) : "bookable";
               const bookable = availability === "bookable";
               return (
                 <option key={t} value={t} disabled={!bookable}>
                   {t}
                   {availability === "past" ? " (already passed)" : ""}
                   {availability === "too-far" ? " (more than 24h away)" : ""}
+                  {availability === "closed" ? " (closed — 2nd/3rd Monday)" : ""}
                 </option>
               );
             })}

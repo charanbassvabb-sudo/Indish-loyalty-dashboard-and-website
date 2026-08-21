@@ -49,7 +49,7 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-2">
                 <Clock className="h-3.5 w-3.5 text-primary" />
-                11:30 – 22:00 daily
+                {branch ? branch.hours : "11:30 – 22:00 daily"}
               </li>
             </ul>
           </div>

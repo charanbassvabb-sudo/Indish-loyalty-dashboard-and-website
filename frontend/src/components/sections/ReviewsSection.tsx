@@ -3,21 +3,26 @@ import { Star } from "lucide-react";
 import type { Branch } from "@/types";
 
 const sampleReviews: Record<Branch["id"], { name: string; quote: string; rating: number }[]> = {
+  // Real guest reviews (lightly copy-edited for spelling/grammar only — the
+  // dishes mentioned and sentiment are exactly as written). Sourced from
+  // https://www.tripadvisor.com/Restaurant_Review-g293843-d23922692-Reviews-Indish-Lusaka_Lusaka_Province.html
+  // — a proper Google-reviews auto-sync (via the Places API) is planned for
+  // later; for now these are updated by hand.
   lusaka: [
     {
-      name: "Chanda M.",
-      quote: "The tandoori prawns and the patio at sunset — I've booked our anniversary dinner here every year since it opened.",
+      name: "Christabel M.",
+      quote: "Fantastic presentation of food — we enjoyed every dish at Indish. We tried the baked chicken kebab, cheese herb balls, and Chicken Maharaja with layered naan. Thanks for the delicious food and service!",
       rating: 5,
     },
     {
-      name: "Bwalya K.",
-      quote: "Butter chicken poutine sounds odd until you taste it. Service on the terrace was warm and unhurried.",
+      name: "Clarina E.",
+      quote: "Some of the best Indian and Chinese food in Lusaka. We sat out in the open air — the setting was comfortable, the food flavourful, and the portions generous. The interior is elegant with plenty of seating.",
       rating: 5,
     },
     {
-      name: "Natasha P.",
-      quote: "Best cocktail list in EastPark. The saffron old fashioned is worth the trip alone.",
-      rating: 4,
+      name: "Rajendra M.",
+      quote: "Great multi-cuisine food at East Park Mall. Try the mutton seekh kebab, tandoori mushrooms, fusion pizzas, and lots more.",
+      rating: 5,
     },
   ],
   kitwe: [

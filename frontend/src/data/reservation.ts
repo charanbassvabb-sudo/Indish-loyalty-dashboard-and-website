@@ -64,7 +64,23 @@ export const DEPOSIT_PER_GUEST_ZMW = 100;
 // Reservations can only be made for a slot within this many hours from now.
 export const MAX_ADVANCE_HOURS = 24;
 
-export type SlotAvailability = "bookable" | "past" | "too-far";
+export type SlotAvailability = "bookable" | "past" | "too-far" | "closed";
+
+/**
+ * Lusaka is closed on the 2nd and 3rd Monday of every month — a fixed,
+ * permanent recurring closure (not a manual admin toggle), so it's computed
+ * here rather than tracked as one-off dates. Mirrored server-side in
+ * isLusakaRecurringClosure (backend/src/utils/branchHours.ts), which is what
+ * actually enforces it — this client-side copy just gives immediate
+ * feedback in the time-slot picker instead of waiting for a rejected submit.
+ */
+export function isLusakaRecurringClosure(date: string, branchId: BranchId): boolean {
+  if (branchId !== "lusaka" || !date) return false;
+  const d = new Date(`${date}T12:00:00Z`); // midday UTC — immune to timezone drift
+  if (d.getUTCDay() !== 1) return false; // 1 = Monday
+  const occurrence = Math.ceil(d.getUTCDate() / 7);
+  return occurrence === 2 || occurrence === 3;
+}
 
 // Time slots are always restaurant-local (Africa/Lusaka, UTC+2, no DST)
 // wall-clock values, not the visitor's own browser timezone — someone
@@ -73,7 +89,8 @@ export type SlotAvailability = "bookable" | "past" | "too-far";
 // keeps this in lockstep with the identical fix on the backend
 // (isWithinBookingWindow in validators/reservation.validator.ts), which
 // runs on a UTC server and had the same bug the other direction.
-export function getSlotAvailability(date: string, time: string): SlotAvailability {
+export function getSlotAvailability(date: string, time: string, branchId: BranchId): SlotAvailability {
+  if (isLusakaRecurringClosure(date, branchId)) return "closed";
   const target = new Date(`${date}T${time}:00+02:00`);
   const now = new Date();
   const maxDate = new Date(now.getTime() + MAX_ADVANCE_HOURS * 60 * 60 * 1000);
@@ -82,9 +99,9 @@ export function getSlotAvailability(date: string, time: string): SlotAvailabilit
   return "bookable";
 }
 
-export function isSlotBookable(date: string, time: string): boolean {
+export function isSlotBookable(date: string, time: string, branchId: BranchId): boolean {
   if (!date || !time) return false;
-  return getSlotAvailability(date, time) === "bookable";
+  return getSlotAvailability(date, time, branchId) === "bookable";
 }
 
 // Payment (provider selection, screenshot upload, verification) is a

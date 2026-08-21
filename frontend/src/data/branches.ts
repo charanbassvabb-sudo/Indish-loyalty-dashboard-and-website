@@ -11,7 +11,7 @@ export const branches: Record<Branch["id"], Branch> = {
     id: "lusaka",
     name: "Indish — Lusaka",
     tagline: "Tandoor fire and fusion plates on EastPark's terrace",
-    address: "Shop No. K72, East Park Mall, next to Game Zone, Lusaka, Zambia",
+    address: "Shop No. 10, East Park Mall, next to Sikale Deco, Lusaka, Zambia",
     plusCode: "J84F+79 Lusaka",
     phone: "0976309999",
     rating: 4.4,
@@ -22,7 +22,12 @@ export const branches: Record<Branch["id"], Branch> = {
     interiorImage: lusakaPatio,
     gallery: [lusakaPatio],
     galleryBlurKeys: ["lusaka-patio.jpg"],
-    hours: "11:30 – 22:00 daily",
+    // Mon–Thu and Fri–Sun differ, and Lusaka is additionally closed on the
+    // 2nd and 3rd Monday of every month (see isRecurringlyClosed in
+    // data/reservation.ts, enforced automatically — not a manual admin
+    // toggle — and mirrored server-side in reservation.validator.ts /
+    // availability.controller.ts).
+    hours: "Mon–Thu 11:30–22:00 · Fri–Sun 11:00–23:00 (closed 2nd & 3rd Mon of the month)",
   },
   kitwe: {
     id: "kitwe",

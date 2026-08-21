@@ -2,6 +2,19 @@ import type { Request, Response } from "express";
 import { z } from "zod";
 import { prisma } from "../lib/prisma";
 import { ApiError } from "../utils/ApiError";
+import { isLusakaRecurringClosure, LUSAKA_CLOSURE_NOTE } from "../utils/branchHours";
+
+/** Every calendar date from `from` to `to` inclusive, as YYYY-MM-DD strings. */
+function eachDate(from: string, to: string): string[] {
+  const dates: string[] = [];
+  const cursor = new Date(`${from}T00:00:00Z`);
+  const end = new Date(`${to}T00:00:00Z`);
+  while (cursor <= end) {
+    dates.push(cursor.toISOString().slice(0, 10));
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+  }
+  return dates;
+}
 
 const branchCodeSchema = z.enum(["LUSAKA", "KITWE"]);
 
@@ -36,14 +49,32 @@ export async function getPublicAvailability(req: Request, res: Response) {
     orderBy: { date: "asc" },
   });
 
+  // Keyed by "BRANCH|date" — a bare date would collide between branches
+  // when this endpoint is called without a branch filter (e.g. the admin
+  // dashboard listing overrides across both).
+  const byKey = new Map(
+    rows.map((r) => {
+      const date = r.date.toISOString().slice(0, 10);
+      const entry = { branch: r.branch.code, date, seatsLeft: r.seatsLeft, fullyBooked: r.fullyBooked, note: r.note };
+      return [`${entry.branch}|${date}`, entry];
+    }),
+  );
+
+  // Lusaka's 2nd/3rd-Monday closure is a fixed recurring rule, not a staff-set
+  // override — surface it here too (as if it were a fullyBooked row) so the
+  // "seats left" banner shows "Closed" before the customer even tries to
+  // submit, without anyone having to remember to add DailyAvailability rows
+  // every month. Takes precedence over any stale override for the same date.
+  if ((!query.branch || query.branch === "LUSAKA") && query.from && query.to) {
+    for (const date of eachDate(query.from, query.to)) {
+      if (isLusakaRecurringClosure(date, "LUSAKA")) {
+        byKey.set(`LUSAKA|${date}`, { branch: "LUSAKA", date, seatsLeft: 0, fullyBooked: true, note: LUSAKA_CLOSURE_NOTE });
+      }
+    }
+  }
+
   res.json({
-    availability: rows.map((r) => ({
-      branch: r.branch.code,
-      date: r.date.toISOString().slice(0, 10),
-      seatsLeft: r.seatsLeft,
-      fullyBooked: r.fullyBooked,
-      note: r.note,
-    })),
+    availability: [...byKey.values()].sort((a, b) => a.date.localeCompare(b.date) || a.branch.localeCompare(b.branch)),
   });
 }
 

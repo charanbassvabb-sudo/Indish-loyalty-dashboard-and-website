@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isLusakaRecurringClosure, LUSAKA_CLOSURE_NOTE } from "../utils/branchHours";
 
 export const TIME_SLOTS = [
   "11:30",
@@ -59,6 +60,14 @@ export const createReservationSchema = z
     occasion: z.string().trim().max(500).optional().or(z.literal("")).optional(),
   })
   .superRefine((data, ctx) => {
+    if (isLusakaRecurringClosure(data.date, data.branch)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["date"],
+        message: `${LUSAKA_CLOSURE_NOTE} — please pick another date`,
+      });
+      return;
+    }
     if (!isWithinBookingWindow(data.date, data.time)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
