@@ -3,42 +3,45 @@ import { Star } from "lucide-react";
 import type { Branch } from "@/types";
 
 const sampleReviews: Record<Branch["id"], { name: string; quote: string; rating: number }[]> = {
-  // Real guest reviews (lightly copy-edited for spelling/grammar only — the
-  // dishes mentioned and sentiment are exactly as written). Sourced from
-  // https://www.tripadvisor.com/Restaurant_Review-g293843-d23922692-Reviews-Indish-Lusaka_Lusaka_Province.html
-  // — a proper Google-reviews auto-sync (via the Places API) is planned for
+  // Real guest reviews, pulled directly from each branch's Google Maps
+  // listing (copy-edited only for the odd typo — quoted content and
+  // sentiment are exactly as written; only complete, non-truncated reviews
+  // were used, and only the positive ones, same as any business would pick
+  // for a testimonials section — individual star ratings weren't visible in
+  // the copied text, so 5 is used throughout, matching their tone). A
+  // proper Google-reviews auto-sync (via the Places API) is planned for
   // later; for now these are updated by hand.
   lusaka: [
     {
-      name: "Christabel M.",
-      quote: "Fantastic presentation of food — we enjoyed every dish at Indish. We tried the baked chicken kebab, cheese herb balls, and Chicken Maharaja with layered naan. Thanks for the delicious food and service!",
+      name: "Salmaan S.",
+      quote: "Had a great dining experience at Indish Fusion Food & Cocktails. Very friendly and welcoming service, amazingly beautiful ambience, great Indian and Chinese inspired food menu and great range of cocktails and mocktails. Highly recommend it.",
       rating: 5,
     },
     {
-      name: "Clarina E.",
-      quote: "Some of the best Indian and Chinese food in Lusaka. We sat out in the open air — the setting was comfortable, the food flavourful, and the portions generous. The interior is elegant with plenty of seating.",
+      name: "Just Phelix",
+      quote: "For me this is the best place you can enjoy an Indian cuisine in Lusaka. It boasts of a very good central location. The service is on point, the food is excellent and it always feels good to be here from time to time. And it's family friendly too!",
       rating: 5,
     },
     {
-      name: "Rajendra M.",
-      quote: "Great multi-cuisine food at East Park Mall. Try the mutton seekh kebab, tandoori mushrooms, fusion pizzas, and lots more.",
+      name: "Scott S.",
+      quote: "The food was a nice fusion of Indian and Asian. Nice combination and was very good. Our server was perfect! We plan on going back before we leave Lusaka.",
       rating: 5,
     },
   ],
   kitwe: [
     {
-      name: "Mutale C.",
-      quote: "Hyderabadi biryani here rivals anything I've had in Lusaka. Portions are generous and consistent.",
+      name: "Lucy C.",
+      quote: "Lovely atmosphere. The food was fresh and tasty. Attentive and friendly staff, always on hand to serve. Where they're not sure, the chef comes through to give more insight on the dish upon request. All in all, a great place to enjoy a meal and conversate.",
       rating: 5,
     },
     {
-      name: "Joseph T.",
-      quote: "Cosy indoor room, great for a quiet family dinner after work. The dal makhani is a must.",
-      rating: 4,
+      name: "Stephanie R.",
+      quote: "Highly recommended. Great service, excellent food and generous portions. We had the Thai spring rolls, a very generous starter, beautifully presented. Our mains, lamb shank korma and veggie paneer tomato curry with garlic naan and special pulav rice, were also very good.",
+      rating: 5,
     },
     {
-      name: "Ruth L.",
-      quote: "Chicken 65 and the masala shandy — my go-to order every time I'm in Kitwe.",
+      name: "Caroline S.",
+      quote: "Excellent food, welcoming ambience, and very professional but friendly staff. My new favourite joint.",
       rating: 5,
     },
   ],
