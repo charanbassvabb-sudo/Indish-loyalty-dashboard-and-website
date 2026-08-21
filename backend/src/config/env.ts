@@ -37,6 +37,11 @@ const envSchema = z.object({
   // re-review), a second, separate, zero-variable template carries the same
   // line instead. See sendPaymentConfirmedNotification().
   WHATSAPP_AUTOMATED_NOTICE_TEMPLATE_NAME: z.string().optional(),
+  // Staff-facing alert (not customer-facing) — same 24h-free-text limitation
+  // applies to NOTIFY_PHONE_NUMBER too: without this, "payment needs review"
+  // pings only actually deliver if that phone has messaged the WhatsApp
+  // Business number within the last 24h. See sendPaymentUnderReviewNotifications().
+  WHATSAPP_STAFF_REVIEW_TEMPLATE_NAME: z.string().optional(),
   NOTIFY_PHONE_NUMBER: z.string().optional(),
   // Inbound-message webhook (auto-answers to basic FAQ questions — see
   // whatsapp.controller.ts). VERIFY_TOKEN is a secret we invent ourselves and

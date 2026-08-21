@@ -243,6 +243,13 @@ function formatStaffReviewMessage(p: ReservationWhatsAppPayload): string {
   ].join("\n");
 }
 
+function buildStaffReviewTemplateParams(p: ReservationWhatsAppPayload) {
+  return [p.reference, p.branchName, p.customerName, p.phone, String(p.depositAmount)].map((text) => ({
+    type: "text" as const,
+    text,
+  }));
+}
+
 /**
  * Fired when a reservation is first created (status PENDING_PAYMENT — see
  * reservation.controller.ts), BEFORE any payment has happened. Tells the
@@ -272,10 +279,15 @@ function buildUnderReviewTemplateParams(p: ReservationWhatsAppPayload) {
  * lost, not ignored) and pings staff that something's actually waiting on
  * them in the Payments tab.
  *
- * Same template-vs-free-text tradeoff as sendPaymentConfirmedNotification:
- * uses the approved WHATSAPP_UNDER_REVIEW_TEMPLATE_NAME when configured
- * (works for any customer, any time), otherwise falls back to free-form
- * text (only actually delivers within an open 24h session).
+ * Same template-vs-free-text tradeoff as sendPaymentConfirmedNotification,
+ * applied to BOTH sends here — the customer message uses
+ * WHATSAPP_UNDER_REVIEW_TEMPLATE_NAME when configured, and the staff alert
+ * (to NOTIFY_PHONE_NUMBER) uses WHATSAPP_STAFF_REVIEW_TEMPLATE_NAME
+ * (submitted to Meta as "staff_payment_review_alert", pending approval as
+ * of writing). Until each is approved, that side falls back to free-form
+ * text, which Meta only delivers within an open 24h session — this was
+ * silently failing to reach staff whenever NOTIFY_PHONE_NUMBER hadn't
+ * messaged the WhatsApp Business number recently.
  */
 export async function sendPaymentUnderReviewNotifications(payload: ReservationWhatsAppPayload) {
   const customerSend = env.WHATSAPP_UNDER_REVIEW_TEMPLATE_NAME
@@ -289,7 +301,14 @@ export async function sendPaymentUnderReviewNotifications(payload: ReservationWh
   const sends: Promise<void>[] = [customerSend];
 
   if (env.NOTIFY_PHONE_NUMBER) {
-    sends.push(sendWhatsAppMessage(env.NOTIFY_PHONE_NUMBER, formatStaffReviewMessage(payload)));
+    const staffSend = env.WHATSAPP_STAFF_REVIEW_TEMPLATE_NAME
+      ? sendWhatsAppTemplate(
+          env.NOTIFY_PHONE_NUMBER,
+          env.WHATSAPP_STAFF_REVIEW_TEMPLATE_NAME,
+          buildStaffReviewTemplateParams(payload),
+        )
+      : sendWhatsAppMessage(env.NOTIFY_PHONE_NUMBER, formatStaffReviewMessage(payload));
+    sends.push(staffSend);
   }
 
   await Promise.allSettled(sends);
