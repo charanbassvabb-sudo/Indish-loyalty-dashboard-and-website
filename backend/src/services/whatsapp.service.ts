@@ -3,6 +3,7 @@ import { env } from "../config/env";
 interface ReservationWhatsAppPayload {
   reference: string;
   branchName: string;
+  branchCode: "LUSAKA" | "KITWE";
   customerName: string;
   phone: string;
   email: string;
@@ -25,6 +26,18 @@ const AUTOMATED_DISCLAIMER = "Automated message — replies & calls aren't monit
 
 function isConfigured() {
   return Boolean(env.WHATSAPP_PHONE_NUMBER_ID && env.WHATSAPP_ACCESS_TOKEN);
+}
+
+/**
+ * Which admin number a staff alert for a given branch should go to.
+ * Falls back to the shared NOTIFY_PHONE_NUMBER if that branch doesn't have
+ * its own number configured, so a fresh deploy that only sets the old
+ * single var keeps working exactly as before.
+ */
+function staffNumberFor(branchCode: ReservationWhatsAppPayload["branchCode"]): string | undefined {
+  if (branchCode === "LUSAKA") return env.NOTIFY_PHONE_NUMBER_LUSAKA ?? env.NOTIFY_PHONE_NUMBER;
+  if (branchCode === "KITWE") return env.NOTIFY_PHONE_NUMBER_KITWE ?? env.NOTIFY_PHONE_NUMBER;
+  return env.NOTIFY_PHONE_NUMBER;
 }
 
 /**
@@ -260,10 +273,11 @@ function buildStaffReviewTemplateParams(p: ReservationWhatsAppPayload) {
 export async function sendBookingCreatedNotifications(payload: ReservationWhatsAppPayload) {
   const sends: Promise<void>[] = [sendWhatsAppMessage(payload.phone, formatBookingCreatedMessage(payload))];
 
-  if (env.NOTIFY_PHONE_NUMBER) {
-    sends.push(sendWhatsAppMessage(env.NOTIFY_PHONE_NUMBER, formatStaffMessage(payload)));
+  const staffNumber = staffNumberFor(payload.branchCode);
+  if (staffNumber) {
+    sends.push(sendWhatsAppMessage(staffNumber, formatStaffMessage(payload)));
   } else {
-    console.warn("[whatsapp] NOTIFY_PHONE_NUMBER not set — skipped staff notification");
+    console.warn(`[whatsapp] No admin number configured for ${payload.branchCode} — skipped staff notification`);
   }
 
   await Promise.allSettled(sends);
@@ -282,12 +296,13 @@ function buildUnderReviewTemplateParams(p: ReservationWhatsAppPayload) {
  * Same template-vs-free-text tradeoff as sendPaymentConfirmedNotification,
  * applied to BOTH sends here — the customer message uses
  * WHATSAPP_UNDER_REVIEW_TEMPLATE_NAME when configured, and the staff alert
- * (to NOTIFY_PHONE_NUMBER) uses WHATSAPP_STAFF_REVIEW_TEMPLATE_NAME
- * (submitted to Meta as "staff_payment_review_alert", pending approval as
- * of writing). Until each is approved, that side falls back to free-form
- * text, which Meta only delivers within an open 24h session — this was
- * silently failing to reach staff whenever NOTIFY_PHONE_NUMBER hadn't
- * messaged the WhatsApp Business number recently.
+ * (to that branch's admin number — see staffNumberFor) uses
+ * WHATSAPP_STAFF_REVIEW_TEMPLATE_NAME (submitted to Meta as
+ * "staff_payment_review_alert", pending approval as of writing). Until each
+ * is approved, that side falls back to free-form text, which Meta only
+ * delivers within an open 24h session — this was silently failing to reach
+ * staff whenever the admin number hadn't messaged the WhatsApp Business
+ * number recently.
  */
 export async function sendPaymentUnderReviewNotifications(payload: ReservationWhatsAppPayload) {
   const customerSend = env.WHATSAPP_UNDER_REVIEW_TEMPLATE_NAME
@@ -300,15 +315,18 @@ export async function sendPaymentUnderReviewNotifications(payload: ReservationWh
 
   const sends: Promise<void>[] = [customerSend];
 
-  if (env.NOTIFY_PHONE_NUMBER) {
+  const staffNumber = staffNumberFor(payload.branchCode);
+  if (staffNumber) {
     const staffSend = env.WHATSAPP_STAFF_REVIEW_TEMPLATE_NAME
       ? sendWhatsAppTemplate(
-          env.NOTIFY_PHONE_NUMBER,
+          staffNumber,
           env.WHATSAPP_STAFF_REVIEW_TEMPLATE_NAME,
           buildStaffReviewTemplateParams(payload),
         )
-      : sendWhatsAppMessage(env.NOTIFY_PHONE_NUMBER, formatStaffReviewMessage(payload));
+      : sendWhatsAppMessage(staffNumber, formatStaffReviewMessage(payload));
     sends.push(staffSend);
+  } else {
+    console.warn(`[whatsapp] No admin number configured for ${payload.branchCode} — skipped review alert`);
   }
 
   await Promise.allSettled(sends);

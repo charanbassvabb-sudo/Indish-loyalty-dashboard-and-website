@@ -72,6 +72,7 @@ export async function createReservation(req: Request, res: Response) {
   sendBookingCreatedNotifications({
     reference: reservation.reference,
     branchName: reservation.branch.name,
+    branchCode: reservation.branch.code,
     customerName: reservation.customerName,
     phone: reservation.phone,
     email: reservation.email,
@@ -221,6 +222,7 @@ export async function updateReservation(req: Request, res: Response) {
     const notifyPayload = {
       reference: reservation.reference,
       branchName: reservation.branch.name,
+      branchCode: reservation.branch.code,
       customerName: reservation.customerName,
       phone: reservation.phone,
       email: reservation.email,

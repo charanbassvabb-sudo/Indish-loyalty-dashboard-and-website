@@ -42,7 +42,14 @@ const envSchema = z.object({
   // pings only actually deliver if that phone has messaged the WhatsApp
   // Business number within the last 24h. See sendPaymentUnderReviewNotifications().
   WHATSAPP_STAFF_REVIEW_TEMPLATE_NAME: z.string().optional(),
+  // Per-branch admin numbers — each branch's own admin gets pinged for that
+  // branch's reservations (new booking + payment-needs-review) instead of
+  // everything going to one shared number. NOTIFY_PHONE_NUMBER is kept as a
+  // fallback: used for any branch that doesn't have its own number set, so
+  // this stays backward-compatible with existing single-number setups.
   NOTIFY_PHONE_NUMBER: z.string().optional(),
+  NOTIFY_PHONE_NUMBER_LUSAKA: z.string().optional(),
+  NOTIFY_PHONE_NUMBER_KITWE: z.string().optional(),
   // Inbound-message webhook (auto-answers to basic FAQ questions — see
   // whatsapp.controller.ts). VERIFY_TOKEN is a secret we invent ourselves and
   // paste into Meta's App Dashboard webhook config so Meta's verification

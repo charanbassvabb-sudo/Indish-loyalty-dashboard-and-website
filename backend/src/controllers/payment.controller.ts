@@ -43,11 +43,12 @@ function notifyPayloadFor(reservation: {
   seating: string;
   depositAmount: Prisma.Decimal;
   notes: string | null;
-  branch: { name: string };
+  branch: { name: string; code: "LUSAKA" | "KITWE" };
 }) {
   return {
     reference: reservation.reference,
     branchName: reservation.branch.name,
+    branchCode: reservation.branch.code,
     customerName: reservation.customerName,
     phone: reservation.phone,
     email: reservation.email,
