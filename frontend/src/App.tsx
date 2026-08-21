@@ -13,7 +13,9 @@ import { PageLoader } from "@/components/ui/PageLoader";
 const BranchSelectPage = lazy(() => import("@/pages/BranchSelectPage"));
 const HomePage = lazy(() => import("@/pages/HomePage"));
 const MenuPage = lazy(() => import("@/pages/MenuPage"));
+const MenuLandingPage = lazy(() => import("@/pages/MenuLandingPage"));
 const ReservePage = lazy(() => import("@/pages/ReservePage"));
+const LeaveReviewPage = lazy(() => import("@/pages/LeaveReviewPage"));
 const ComplaintsPage = lazy(() => import("@/pages/ComplaintsPage"));
 const PrivacyPolicyPage = lazy(() => import("@/pages/PrivacyPolicyPage"));
 const NotFoundPage = lazy(() => import("@/pages/NotFoundPage"));
@@ -27,6 +29,13 @@ function PublicSite() {
         <Route element={<Layout />}>
           <Route path="/" element={<BranchSelectPage />} />
           <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+          {/* Branch-agnostic landing pages — what the two front-of-house QR
+              codes point at, so one printed code works regardless of which
+              branch it's scanned at. Must come before the /:branchId
+              catch-all below or "menu"/"leave-a-review" would be parsed as
+              a branch id instead. */}
+          <Route path="/menu" element={<MenuLandingPage />} />
+          <Route path="/leave-a-review" element={<LeaveReviewPage />} />
           <Route path="/:branchId" element={<HomePage />} />
           <Route path="/:branchId/menu" element={<MenuPage />} />
           <Route path="/:branchId/reserve" element={<ReservePage />} />
