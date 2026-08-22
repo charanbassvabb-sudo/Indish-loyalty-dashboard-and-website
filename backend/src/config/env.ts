@@ -46,7 +46,10 @@ const envSchema = z.object({
   // branch's reservations (new booking + payment-needs-review) instead of
   // everything going to one shared number. NOTIFY_PHONE_NUMBER is kept as a
   // fallback: used for any branch that doesn't have its own number set, so
-  // this stays backward-compatible with existing single-number setups.
+  // this stays backward-compatible with existing single-number setups. Each
+  // var can hold more than one number, comma-separated — every listed
+  // number gets its own copy of the alert (see staffNumbersFor in
+  // whatsapp.service.ts).
   NOTIFY_PHONE_NUMBER: z.string().optional(),
   NOTIFY_PHONE_NUMBER_LUSAKA: z.string().optional(),
   NOTIFY_PHONE_NUMBER_KITWE: z.string().optional(),

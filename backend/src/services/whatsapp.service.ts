@@ -29,15 +29,26 @@ function isConfigured() {
 }
 
 /**
- * Which admin number a staff alert for a given branch should go to.
+ * Which admin number(s) a staff alert for a given branch should go to.
  * Falls back to the shared NOTIFY_PHONE_NUMBER if that branch doesn't have
- * its own number configured, so a fresh deploy that only sets the old
- * single var keeps working exactly as before.
+ * its own configured, so a fresh deploy that only sets the old single var
+ * keeps working exactly as before. Each NOTIFY_PHONE_NUMBER* var can hold
+ * more than one number, comma-separated (e.g.
+ * "+260965545454,+260966008080") — every listed number gets its own copy
+ * of the alert, for branches with more than one person who needs to see it.
  */
-function staffNumberFor(branchCode: ReservationWhatsAppPayload["branchCode"]): string | undefined {
-  if (branchCode === "LUSAKA") return env.NOTIFY_PHONE_NUMBER_LUSAKA ?? env.NOTIFY_PHONE_NUMBER;
-  if (branchCode === "KITWE") return env.NOTIFY_PHONE_NUMBER_KITWE ?? env.NOTIFY_PHONE_NUMBER;
-  return env.NOTIFY_PHONE_NUMBER;
+function staffNumbersFor(branchCode: ReservationWhatsAppPayload["branchCode"]): string[] {
+  const raw =
+    branchCode === "LUSAKA"
+      ? (env.NOTIFY_PHONE_NUMBER_LUSAKA ?? env.NOTIFY_PHONE_NUMBER)
+      : branchCode === "KITWE"
+        ? (env.NOTIFY_PHONE_NUMBER_KITWE ?? env.NOTIFY_PHONE_NUMBER)
+        : env.NOTIFY_PHONE_NUMBER;
+  if (!raw) return [];
+  return raw
+    .split(",")
+    .map((n) => n.trim())
+    .filter(Boolean);
 }
 
 /**
@@ -273,9 +284,9 @@ function buildStaffReviewTemplateParams(p: ReservationWhatsAppPayload) {
 export async function sendBookingCreatedNotifications(payload: ReservationWhatsAppPayload) {
   const sends: Promise<void>[] = [sendWhatsAppMessage(payload.phone, formatBookingCreatedMessage(payload))];
 
-  const staffNumber = staffNumberFor(payload.branchCode);
-  if (staffNumber) {
-    sends.push(sendWhatsAppMessage(staffNumber, formatStaffMessage(payload)));
+  const staffNumbers = staffNumbersFor(payload.branchCode);
+  if (staffNumbers.length) {
+    for (const num of staffNumbers) sends.push(sendWhatsAppMessage(num, formatStaffMessage(payload)));
   } else {
     console.warn(`[whatsapp] No admin number configured for ${payload.branchCode} — skipped staff notification`);
   }
@@ -296,7 +307,7 @@ function buildUnderReviewTemplateParams(p: ReservationWhatsAppPayload) {
  * Same template-vs-free-text tradeoff as sendPaymentConfirmedNotification,
  * applied to BOTH sends here — the customer message uses
  * WHATSAPP_UNDER_REVIEW_TEMPLATE_NAME when configured, and the staff alert
- * (to that branch's admin number — see staffNumberFor) uses
+ * (to that branch's admin number(s) — see staffNumbersFor) uses
  * WHATSAPP_STAFF_REVIEW_TEMPLATE_NAME (submitted to Meta as
  * "staff_payment_review_alert", pending approval as of writing). Until each
  * is approved, that side falls back to free-form text, which Meta only
@@ -315,16 +326,14 @@ export async function sendPaymentUnderReviewNotifications(payload: ReservationWh
 
   const sends: Promise<void>[] = [customerSend];
 
-  const staffNumber = staffNumberFor(payload.branchCode);
-  if (staffNumber) {
-    const staffSend = env.WHATSAPP_STAFF_REVIEW_TEMPLATE_NAME
-      ? sendWhatsAppTemplate(
-          staffNumber,
-          env.WHATSAPP_STAFF_REVIEW_TEMPLATE_NAME,
-          buildStaffReviewTemplateParams(payload),
-        )
-      : sendWhatsAppMessage(staffNumber, formatStaffReviewMessage(payload));
-    sends.push(staffSend);
+  const staffNumbers = staffNumbersFor(payload.branchCode);
+  if (staffNumbers.length) {
+    for (const num of staffNumbers) {
+      const staffSend = env.WHATSAPP_STAFF_REVIEW_TEMPLATE_NAME
+        ? sendWhatsAppTemplate(num, env.WHATSAPP_STAFF_REVIEW_TEMPLATE_NAME, buildStaffReviewTemplateParams(payload))
+        : sendWhatsAppMessage(num, formatStaffReviewMessage(payload));
+      sends.push(staffSend);
+    }
   } else {
     console.warn(`[whatsapp] No admin number configured for ${payload.branchCode} — skipped review alert`);
   }
