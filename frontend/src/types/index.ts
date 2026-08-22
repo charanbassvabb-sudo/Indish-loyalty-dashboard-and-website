@@ -40,6 +40,7 @@ export interface MenuItem {
   veg?: boolean;
   /** Extra prices beyond the base one — "Veg./Chicken", "Half/Full", "Dry/Gravy" etc. */
   priceVariants?: MenuPriceVariant[];
+  imageUrl?: string;
 }
 
 export interface MenuCategory {

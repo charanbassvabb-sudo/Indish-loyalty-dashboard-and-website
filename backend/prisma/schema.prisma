@@ -118,6 +118,12 @@ model MenuItem {
   // options on the *same* dish (order the same thing, pay a different
   // amount for a different protein/portion), not distinct menu items.
   priceVariants Json?
+  // Filename only (like PaymentAttempt.screenshotPath) — the file lives in
+  // backend/uploads/menu-images/, served publicly at
+  // /api/uploads/menu-images/<imagePath> (see menu.routes.ts / app.ts).
+  // Unlike payment screenshots this is meant to be public, so it's a plain
+  // static file, not streamed through an authenticated route.
+  imagePath   String?
   sortOrder   Int     @default(0)
 
   createdAt DateTime @default(now())

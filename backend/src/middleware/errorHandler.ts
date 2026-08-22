@@ -24,7 +24,7 @@ export function errorHandler(err: unknown, _req: Request, res: Response, _next: 
   }
 
   if (err instanceof multer.MulterError) {
-    const message = err.code === "LIMIT_FILE_SIZE" ? "Screenshot is too large — please keep it under 8MB." : err.message;
+    const message = err.code === "LIMIT_FILE_SIZE" ? "That file is too large." : err.message;
     res.status(400).json({ error: message });
     return;
   }

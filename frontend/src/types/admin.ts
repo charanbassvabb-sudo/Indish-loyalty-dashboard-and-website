@@ -220,6 +220,8 @@ export interface AdminMenuItem {
   badges: AdminMenuBadge[];
   /** Extra prices beyond the base one — "Veg./Chicken", "Half/Full", "Dry/Gravy" etc. */
   priceVariants?: AdminMenuPriceVariant[];
+  /** Absolute-path URL to the dish photo, e.g. "/api/uploads/menu-images/xxx.jpg". Undefined = no photo set. */
+  imageUrl?: string;
 }
 
 export interface AdminMenuCategory {

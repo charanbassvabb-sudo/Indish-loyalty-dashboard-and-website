@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Save, Trash2, Leaf, Plus } from "lucide-react";
+import { X, Save, Trash2, Leaf, Plus, ImageUp, ImageOff } from "lucide-react";
 import { api, ApiRequestError } from "@/lib/api";
 import { useToast } from "@/context/ToastContext";
 import { ALL_MENU_BADGES, type AdminMenuCategory, type AdminMenuItem, type AdminMenuBadge } from "@/types/admin";
@@ -62,10 +62,18 @@ export function MenuItemDrawer({
   const isEditing = Boolean(item);
   const [draft, setDraft] = useState<DraftState>(() => draftFor(item ?? null, defaultCategoryId));
   const [saving, setSaving] = useState(false);
+  // Photo upload/remove happen immediately against the server (not batched
+  // into the main Save), since there's a real file involved and an existing
+  // item id to attach it to — tracked separately from `draft` so it isn't
+  // clobbered by the draft-reset effect below on every keystroke elsewhere.
+  const [imageUrl, setImageUrl] = useState<string | undefined>(item?.imageUrl);
+  const [imageBusy, setImageBusy] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (open) {
       setDraft(draftFor(item ?? null, defaultCategoryId));
+      setImageUrl(item?.imageUrl);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [item, open]);
@@ -161,6 +169,51 @@ export function MenuItemDrawer({
     onClose();
   }
 
+  async function handleImageSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    // Reset the input so choosing the exact same file again still fires this.
+    e.target.value = "";
+    if (!file || !item) return;
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    setImageBusy(true);
+    try {
+      const res = await api.upload<{ item: AdminMenuItem }>(`/admin/menu/items/${item.id}/image`, formData);
+      setImageUrl(res.item.imageUrl);
+      onSaved();
+      toast({ title: "Photo updated", variant: "success" });
+    } catch (err) {
+      toast({
+        title: "Couldn't upload photo",
+        description: err instanceof ApiRequestError ? err.message : "Please try again.",
+        variant: "error",
+      });
+    } finally {
+      setImageBusy(false);
+    }
+  }
+
+  async function handleImageRemove() {
+    if (!item) return;
+    setImageBusy(true);
+    try {
+      await api.delete(`/admin/menu/items/${item.id}/image`);
+      setImageUrl(undefined);
+      onSaved();
+      toast({ title: "Photo removed", variant: "success" });
+    } catch (err) {
+      toast({
+        title: "Couldn't remove photo",
+        description: err instanceof ApiRequestError ? err.message : "Please try again.",
+        variant: "error",
+      });
+    } finally {
+      setImageBusy(false);
+    }
+  }
+
   return (
     <AnimatePresence>
       {open && (
@@ -232,6 +285,58 @@ export function MenuItemDrawer({
                   placeholder="e.g. Chef's special of the week — slow-cooked in a smoky tomato-butter gravy."
                 />
               </label>
+
+              <div>
+                <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Photo (optional)
+                </span>
+                {isEditing && item ? (
+                  <div className="flex items-center gap-3">
+                    {imageUrl ? (
+                      <img
+                        src={imageUrl}
+                        alt={draft.name || "Dish photo"}
+                        className="h-20 w-20 shrink-0 rounded-xl border border-border object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl border border-dashed border-border text-muted-foreground">
+                        <ImageOff className="h-5 w-5" />
+                      </div>
+                    )}
+                    <div className="flex flex-col gap-2">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        onChange={handleImageSelect}
+                        className="hidden"
+                      />
+                      <button
+                        type="button"
+                        disabled={imageBusy}
+                        onClick={() => fileInputRef.current?.click()}
+                        className="flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:border-primary hover:text-primary disabled:opacity-60"
+                      >
+                        <ImageUp className="h-3.5 w-3.5" />
+                        {imageBusy ? "Working..." : imageUrl ? "Replace photo" : "Upload photo"}
+                      </button>
+                      {imageUrl && (
+                        <button
+                          type="button"
+                          disabled={imageBusy}
+                          onClick={handleImageRemove}
+                          className="flex items-center gap-1.5 rounded-full border border-destructive/40 px-3 py-1.5 text-xs font-semibold text-destructive transition-colors hover:bg-destructive/10 disabled:opacity-60"
+                        >
+                          <ImageOff className="h-3.5 w-3.5" />
+                          Remove photo
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground">Save the dish first, then you can add a photo.</p>
+                )}
+              </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <label className="flex flex-col gap-1.5">

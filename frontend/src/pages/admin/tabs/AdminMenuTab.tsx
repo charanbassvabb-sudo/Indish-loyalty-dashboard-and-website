@@ -207,12 +207,25 @@ export function AdminMenuTab() {
                       }`}
                     >
                       <td className="px-5 py-3">
-                        <div className="flex items-center gap-1.5 font-medium text-foreground">
-                          {item.veg && <Leaf className="h-3 w-3 shrink-0 text-emerald-400" />}
-                          {item.name}
-                        </div>
-                        <div className="mt-0.5 max-w-md truncate text-xs text-muted-foreground">
-                          {item.description}
+                        <div className="flex items-center gap-3">
+                          {item.imageUrl ? (
+                            <img
+                              src={item.imageUrl}
+                              alt=""
+                              className="h-10 w-10 shrink-0 rounded-lg border border-border object-cover"
+                            />
+                          ) : (
+                            <div className="h-10 w-10 shrink-0 rounded-lg border border-dashed border-border" />
+                          )}
+                          <div>
+                            <div className="flex items-center gap-1.5 font-medium text-foreground">
+                              {item.veg && <Leaf className="h-3 w-3 shrink-0 text-emerald-400" />}
+                              {item.name}
+                            </div>
+                            <div className="mt-0.5 max-w-md truncate text-xs text-muted-foreground">
+                              {item.description}
+                            </div>
+                          </div>
                         </div>
                       </td>
                       <td className="px-5 py-3 whitespace-nowrap text-foreground">{formatMenuPrice(item)}</td>

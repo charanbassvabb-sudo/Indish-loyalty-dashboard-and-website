@@ -1,11 +1,28 @@
 import type { Request, Response } from "express";
 import { z } from "zod";
+import path from "path";
+import fs from "fs/promises";
 import { Prisma, type MenuItem } from "@prisma/client";
 import { prisma } from "../lib/prisma";
 import { ApiError } from "../utils/ApiError";
 import { stringParam } from "../utils/params";
 import { branchCodeSchema } from "../validators/reservation.validator";
 import { menuItemBodySchema, updateMenuItemBodySchema } from "../validators/menu.validator";
+import { MENU_IMAGE_DIR } from "../middleware/menuImageUpload";
+
+function imageUrlFor(item: MenuItem): string | undefined {
+  return item.imagePath ? `/api/uploads/menu-images/${item.imagePath}` : undefined;
+}
+
+/** Best-effort delete — a missing file (already gone, or never existed) isn't an error here. */
+async function deleteImageFile(imagePath: string | null) {
+  if (!imagePath) return;
+  try {
+    await fs.unlink(path.join(MENU_IMAGE_DIR, imagePath));
+  } catch {
+    // already gone — fine
+  }
+}
 
 type PriceVariant = { label: string; price: number };
 
@@ -24,6 +41,7 @@ function serializePublicItem(item: MenuItem) {
     veg: item.veg,
     badges: (item.badges as string[] | null) ?? [],
     priceVariants: serializePriceVariants(item),
+    imageUrl: imageUrlFor(item),
   };
 }
 
@@ -39,6 +57,7 @@ function serializeAdminItem(item: MenuItem) {
     veg: item.veg,
     badges: (item.badges as string[] | null) ?? [],
     priceVariants: serializePriceVariants(item),
+    imageUrl: imageUrlFor(item),
   };
 }
 
@@ -160,5 +179,48 @@ export async function deleteMenuItem(req: Request, res: Response) {
   if (!existing) throw ApiError.notFound("Menu item not found");
 
   await prisma.menuItem.delete({ where: { id } });
+  await deleteImageFile(existing.imagePath);
   res.status(204).send();
+}
+
+/**
+ * POST /api/admin/menu/items/:id/image — multipart upload (field name
+ * "image"). Replaces any existing photo on this item; the old file is
+ * deleted once the new one is safely saved and the DB row updated.
+ */
+export async function uploadMenuItemImage(req: Request, res: Response) {
+  const id = Number(stringParam(req, "id"));
+  if (!Number.isInteger(id)) throw ApiError.badRequest("Invalid item id");
+  if (!req.file) throw ApiError.badRequest("No image file uploaded");
+
+  const existing = await prisma.menuItem.findUnique({ where: { id } });
+  if (!existing) {
+    await deleteImageFile(req.file.filename);
+    throw ApiError.notFound("Menu item not found");
+  }
+
+  const item = await prisma.menuItem.update({
+    where: { id },
+    data: { imagePath: req.file.filename },
+  });
+
+  await deleteImageFile(existing.imagePath);
+  res.json({ item: serializeAdminItem(item) });
+}
+
+/** DELETE /api/admin/menu/items/:id/image — removes the photo, leaves everything else on the item untouched. */
+export async function removeMenuItemImage(req: Request, res: Response) {
+  const id = Number(stringParam(req, "id"));
+  if (!Number.isInteger(id)) throw ApiError.badRequest("Invalid item id");
+
+  const existing = await prisma.menuItem.findUnique({ where: { id } });
+  if (!existing) throw ApiError.notFound("Menu item not found");
+  if (!existing.imagePath) {
+    res.json({ item: serializeAdminItem(existing) });
+    return;
+  }
+
+  const item = await prisma.menuItem.update({ where: { id }, data: { imagePath: null } });
+  await deleteImageFile(existing.imagePath);
+  res.json({ item: serializeAdminItem(item) });
 }

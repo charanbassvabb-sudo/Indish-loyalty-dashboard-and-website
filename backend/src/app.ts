@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import { env } from "./config/env";
 import { apiLimiter } from "./middleware/rateLimiter";
 import { notFoundHandler, errorHandler } from "./middleware/errorHandler";
+import { MENU_IMAGE_DIR } from "./middleware/menuImageUpload";
 import reservationRoutes from "./routes/reservation.routes";
 import adminRoutes from "./routes/admin.routes";
 import paymentRoutes from "./routes/payment.routes";
@@ -39,6 +40,14 @@ export function createApp() {
   );
   app.use(cookieParser());
   app.use(morgan(env.NODE_ENV === "production" ? "combined" : "dev"));
+
+  // Public, unauthenticated — dish photos. Mounted ahead of apiLimiter on
+  // purpose: a single menu-page load can request a few dozen of these at
+  // once, and a busy shared connection (e.g. mall wifi, many guests behind
+  // one NAT'd IP) shouldn't burn through the same budget as booking/payment
+  // API calls just from browsing the menu.
+  app.use("/api/uploads/menu-images", express.static(MENU_IMAGE_DIR, { maxAge: "30d", immutable: true }));
+
   app.use("/api", apiLimiter);
 
   app.get("/api/health", (_req, res) => {

@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { X, Leaf } from "lucide-react";
 import type { MenuItem } from "@/types";
+import { BlurImage } from "@/components/ui/BlurImage";
 
 const badgeStyles: Record<string, string> = {
   Signature: "bg-gradient-ember text-primary-foreground",
@@ -38,10 +39,18 @@ export function MenuItemModal({ item, onClose }: { item: MenuItem | null; onClos
             <button
               onClick={onClose}
               aria-label="Close"
-              className="absolute right-5 top-5 rounded-full border border-border p-1.5 text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+              className="absolute right-5 top-5 z-10 rounded-full border border-border bg-card/80 p-1.5 text-muted-foreground backdrop-blur-sm transition-colors hover:border-primary hover:text-primary"
             >
               <X className="h-4 w-4" />
             </button>
+
+            {item.imageUrl && (
+              <BlurImage
+                src={item.imageUrl}
+                alt={item.name}
+                className="-mx-8 -mt-8 mb-5 aspect-[16/10] w-[calc(100%+4rem)]"
+              />
+            )}
 
             <div className="relative mb-3 flex flex-wrap items-center gap-2">
               {item.veg && (
