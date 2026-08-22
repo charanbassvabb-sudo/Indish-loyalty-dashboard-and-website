@@ -47,15 +47,18 @@ export interface PaymentProviderOption {
 // Client-confirmed, per branch — these are real numbers guests send deposits
 // to, so don't guess at additions here without the branch owner confirming
 // them first. Lusaka: Airtel Money only (an agent till — "Get Cash"). Kitwe:
-// Airtel Money + MTN MoMo, both regular wallets — "Send Money" (Zamtel
-// Kwacha dropped — not carried forward to the verified-payment flow).
+// Airtel Money + MTN MoMo, both agent tills too as of 2026-08-23 — "Get
+// Cash", not "Send Money" (Zamtel Kwacha dropped — not carried forward to
+// the verified-payment flow).
 export const PAYMENT_PROVIDERS_BY_BRANCH: Record<BranchId, PaymentProviderOption[]> = {
   lusaka: [
     { id: "AIRTEL_MONEY", label: "Airtel Money", number: "0979771033", ussdCode: "*115#", isAgentNumber: true },
   ],
   kitwe: [
-    { id: "AIRTEL_MONEY", label: "Airtel Money", number: "0976309999", ussdCode: "*115#", isAgentNumber: false },
-    { id: "MTN_MOMO", label: "MTN MoMo", number: "0963240240", ussdCode: "*303#", isAgentNumber: false },
+    // Agent till, registered to Panda Rahul.
+    { id: "AIRTEL_MONEY", label: "Airtel Money", number: "0973371166", ussdCode: "*115#", isAgentNumber: true },
+    // Agent till, registered to Indish Friends.
+    { id: "MTN_MOMO", label: "MTN MoMo", number: "0767393454", ussdCode: "*303#", isAgentNumber: true },
   ],
 };
 

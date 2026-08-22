@@ -5,7 +5,10 @@
  * (src/data/reservation.ts); keep both in sync if either changes.
  *
  * Lusaka: Airtel Money only (client-confirmed). Kitwe: Airtel Money + MTN
- * MoMo (Zamtel dropped — not carried forward to this verified flow).
+ * MoMo, both agent tills as of 2026-08-23 (Panda Rahul / Indish Friends
+ * respectively — see the frontend copy for the isAgentNumber flag that
+ * drives the "Get Cash" vs "Send Money" instructions). Zamtel Kwacha
+ * dropped — not carried forward to this verified flow.
  */
 import type { BranchCode } from "@prisma/client";
 
@@ -16,8 +19,8 @@ export const PAYMENT_NUMBERS_BY_BRANCH: Record<BranchCode, Partial<Record<Suppor
     AIRTEL_MONEY: "0979771033",
   },
   KITWE: {
-    AIRTEL_MONEY: "0976309999",
-    MTN_MOMO: "0963240240",
+    AIRTEL_MONEY: "0973371166",
+    MTN_MOMO: "0767393454",
   },
 };
 
