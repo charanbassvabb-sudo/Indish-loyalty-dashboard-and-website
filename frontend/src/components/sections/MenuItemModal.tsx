@@ -67,10 +67,27 @@ export function MenuItemModal({ item, onClose }: { item: MenuItem | null; onClos
               {item.description}
             </p>
 
-            <div className="mt-6 flex items-center justify-between border-t border-border pt-5">
-              <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Price</span>
-              <span className="font-display text-2xl text-primary">ZMW {item.price}</span>
-            </div>
+            {item.priceVariants?.length ? (
+              <div className="mt-6 border-t border-border pt-5">
+                <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Price</span>
+                <div className="mt-2 flex flex-col gap-1.5">
+                  {[
+                    { label: item.priceLabel ?? "", price: item.price },
+                    ...item.priceVariants,
+                  ].map((v, i) => (
+                    <div key={i} className="flex items-center justify-between">
+                      {v.label && <span className="text-sm text-muted-foreground">{v.label}</span>}
+                      <span className="ml-auto font-display text-xl text-primary">ZMW {v.price}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="mt-6 flex items-center justify-between border-t border-border pt-5">
+                <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Price</span>
+                <span className="font-display text-2xl text-primary">ZMW {item.price}</span>
+              </div>
+            )}
           </motion.div>
         </motion.div>
       )}

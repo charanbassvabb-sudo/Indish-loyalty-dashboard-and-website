@@ -1,11 +1,17 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Save, Trash2, Leaf } from "lucide-react";
+import { X, Save, Trash2, Leaf, Plus } from "lucide-react";
 import { api, ApiRequestError } from "@/lib/api";
 import { useToast } from "@/context/ToastContext";
 import { ALL_MENU_BADGES, type AdminMenuCategory, type AdminMenuItem, type AdminMenuBadge } from "@/types/admin";
 
 type BranchScope = "BOTH" | "LUSAKA" | "KITWE";
+
+/** Draft form of a price variant — price kept as a string while editing, same as the base price field. */
+interface VariantDraft {
+  label: string;
+  price: string;
+}
 
 interface DraftState {
   categoryId: number;
@@ -13,6 +19,9 @@ interface DraftState {
   name: string;
   description: string;
   price: string;
+  /** What the base price is for once there's more than one price — e.g. "Veg". */
+  priceLabel: string;
+  priceVariants: VariantDraft[];
   veg: boolean;
   badges: AdminMenuBadge[];
 }
@@ -24,6 +33,8 @@ function draftFor(item: AdminMenuItem | null, defaultCategoryId: number): DraftS
     name: item?.name ?? "",
     description: item?.description ?? "",
     price: item ? String(item.price) : "",
+    priceLabel: item?.priceLabel ?? "",
+    priceVariants: item?.priceVariants?.map((v) => ({ label: v.label, price: String(v.price) })) ?? [],
     veg: item?.veg ?? false,
     badges: item?.badges ?? [],
   };
@@ -66,6 +77,21 @@ export function MenuItemDrawer({
     }));
   }
 
+  function addVariant() {
+    setDraft((d) => ({ ...d, priceVariants: [...d.priceVariants, { label: "", price: "" }] }));
+  }
+
+  function updateVariant(index: number, patch: Partial<VariantDraft>) {
+    setDraft((d) => ({
+      ...d,
+      priceVariants: d.priceVariants.map((v, i) => (i === index ? { ...v, ...patch } : v)),
+    }));
+  }
+
+  function removeVariant(index: number) {
+    setDraft((d) => ({ ...d, priceVariants: d.priceVariants.filter((_, i) => i !== index) }));
+  }
+
   async function save() {
     const price = Number(draft.price);
     if (!draft.name.trim()) {
@@ -81,6 +107,20 @@ export function MenuItemDrawer({
       return;
     }
 
+    const priceVariants: { label: string; price: number }[] = [];
+    for (const v of draft.priceVariants) {
+      const variantPrice = Number(v.price);
+      if (!v.label.trim() || !Number.isFinite(variantPrice) || variantPrice <= 0) {
+        toast({
+          title: "Incomplete price variant",
+          description: "Give every extra price a label (e.g. \"Chicken\") and an amount, or remove it.",
+          variant: "error",
+        });
+        return;
+      }
+      priceVariants.push({ label: v.label.trim(), price: variantPrice });
+    }
+
     setSaving(true);
     const payload = {
       categoryId: draft.categoryId,
@@ -88,6 +128,8 @@ export function MenuItemDrawer({
       name: draft.name.trim(),
       description: draft.description.trim(),
       price,
+      priceLabel: priceVariants.length ? draft.priceLabel.trim() || null : null,
+      priceVariants: priceVariants.length ? priceVariants : null,
       veg: draft.veg,
       badges: draft.badges,
     };
@@ -219,6 +261,70 @@ export function MenuItemDrawer({
                     <option value="KITWE">Kitwe only</option>
                   </select>
                 </label>
+              </div>
+
+              <div>
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Extra prices (optional)
+                  </span>
+                  <button
+                    type="button"
+                    onClick={addVariant}
+                    className="flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    Add a price
+                  </button>
+                </div>
+                <p className="mb-2 text-xs text-muted-foreground">
+                  For dishes that print with more than one price, e.g. "Veg. – K200 | Chicken – K250" or
+                  "Half – K200 / Full – K350".
+                </p>
+
+                {draft.priceVariants.length > 0 && (
+                  <label className="mb-2 flex flex-col gap-1.5">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      What the price above (ZMW {draft.price || "0.00"}) is for
+                    </span>
+                    <input
+                      value={draft.priceLabel}
+                      onChange={(e) => setDraft((d) => ({ ...d, priceLabel: e.target.value }))}
+                      className="field"
+                      placeholder="e.g. Veg"
+                    />
+                  </label>
+                )}
+
+                <div className="flex flex-col gap-2">
+                  {draft.priceVariants.map((v, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <input
+                        value={v.label}
+                        onChange={(e) => updateVariant(i, { label: e.target.value })}
+                        className="field flex-1"
+                        placeholder="e.g. Chicken"
+                      />
+                      <input
+                        type="number"
+                        min={0}
+                        step="0.01"
+                        value={v.price}
+                        onChange={(e) => updateVariant(i, { price: e.target.value })}
+                        className="field w-28"
+                        placeholder="0.00"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeVariant(i)}
+                        aria-label="Remove this price"
+                        className="shrink-0 rounded-full border border-border p-2 text-muted-foreground transition-colors hover:border-destructive hover:text-destructive"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <label className="flex items-center gap-2.5 text-sm text-foreground">

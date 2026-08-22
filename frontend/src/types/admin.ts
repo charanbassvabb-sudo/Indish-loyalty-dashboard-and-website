@@ -201,6 +201,11 @@ export type AdminMenuBadge = "Signature" | "Guest Favourite" | "Most Ordered" | 
 
 export const ALL_MENU_BADGES: AdminMenuBadge[] = ["Signature", "Guest Favourite", "Most Ordered", "Chef's Special"];
 
+export interface AdminMenuPriceVariant {
+  label: string;
+  price: number;
+}
+
 export interface AdminMenuItem {
   id: number;
   categoryId: number;
@@ -209,8 +214,12 @@ export interface AdminMenuItem {
   name: string;
   description: string;
   price: number;
+  /** What `price` is for when priceVariants is set — e.g. "Veg", "Half", "Dry". */
+  priceLabel?: string;
   veg: boolean;
   badges: AdminMenuBadge[];
+  /** Extra prices beyond the base one — "Veg./Chicken", "Half/Full", "Dry/Gravy" etc. */
+  priceVariants?: AdminMenuPriceVariant[];
 }
 
 export interface AdminMenuCategory {

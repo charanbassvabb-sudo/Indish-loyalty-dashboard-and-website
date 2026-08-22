@@ -1,8 +1,25 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import type { MenuItem } from "@/types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
+}
+
+/**
+ * A handful of menu items print with more than one price on the physical
+ * menu — "Veg. - K200 | Chicken - K250", "Half - K200 / Full - K350",
+ * "Dry - K100 / Gravy - K150" — via item.priceLabel/priceVariants. Every
+ * other item just has the one price, so this collapses both shapes into
+ * whatever line the card/modal should show.
+ */
+export function formatMenuPrice(item: Pick<MenuItem, "price" | "priceLabel" | "priceVariants">): string {
+  if (!item.priceVariants?.length) return `ZMW ${item.price}`;
+  const parts = [
+    `${item.priceLabel ? `${item.priceLabel} ` : ""}ZMW ${item.price}`,
+    ...item.priceVariants.map((v) => `${v.label} ZMW ${v.price}`),
+  ];
+  return parts.join(" · ");
 }
 
 /**

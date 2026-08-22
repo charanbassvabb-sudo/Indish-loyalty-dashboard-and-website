@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Leaf } from "lucide-react";
 import type { MenuItem } from "@/types";
 import { useTiltSpotlight } from "@/hooks/useTiltSpotlight";
+import { formatMenuPrice } from "@/lib/utils";
 
 const badgeStyles: Record<string, string> = {
   Signature: "bg-gradient-ember text-primary-foreground",
@@ -34,7 +35,13 @@ export function MenuCard({ item, onSelect }: { item: MenuItem; onSelect: (item: 
         <h3 className="font-display text-lg text-foreground transition-colors group-hover:text-primary md:text-xl">
           {item.name}
         </h3>
-        <span className="whitespace-nowrap font-display text-lg text-primary">ZMW {item.price}</span>
+        <span
+          className={`font-display text-primary ${
+            item.priceVariants?.length ? "text-right text-sm leading-tight" : "whitespace-nowrap text-lg"
+          }`}
+        >
+          {formatMenuPrice(item)}
+        </span>
       </div>
 
       {(item.badges?.length || item.veg) && (

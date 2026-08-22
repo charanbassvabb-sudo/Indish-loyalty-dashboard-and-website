@@ -24,13 +24,22 @@ export interface Branch {
 
 export type MenuBadge = "Signature" | "Guest Favourite" | "Most Ordered" | "Chef's Special";
 
+export interface MenuPriceVariant {
+  label: string;
+  price: number;
+}
+
 export interface MenuItem {
   id: string;
   name: string;
   description: string;
   price: number;
+  /** What `price` is for when priceVariants is set — e.g. "Veg", "Half", "Dry". */
+  priceLabel?: string;
   badges?: MenuBadge[];
   veg?: boolean;
+  /** Extra prices beyond the base one — "Veg./Chicken", "Half/Full", "Dry/Gravy" etc. */
+  priceVariants?: MenuPriceVariant[];
 }
 
 export interface MenuCategory {

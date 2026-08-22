@@ -98,11 +98,26 @@ model MenuItem {
 
   name        String
   description String  @db.Text
+  // The "base" price — what's shown when an item only has one price. For
+  // items that print with more than one price on the physical menu (e.g.
+  // "Veg. - K200 | Chicken - K250", "Half - K200 / Full - K350",
+  // "Dry - K100 / Gravy - K150"), this is always the first/primary one and
+  // priceVariants (below) carries the rest, so a plain `price` read never
+  // breaks for callers that don't care about variants.
   price       Decimal @db.Decimal(10, 2)
+  // What `price` above is for, e.g. "Veg", "Half", "Dry" — only meaningful
+  // (and only ever set) alongside priceVariants; null for single-price items.
+  priceLabel  String?
   veg         Boolean @default(false)
   // Subset of the frontend's MenuBadge union (validated in the Zod schema,
   // not the DB — MySQL has no native string-array column via Prisma).
   badges      Json?
+  // Extra priced variants beyond the base `price` above, as
+  // [{ label: "Chicken", price: 250 }, ...] — null/empty when the item only
+  // has one price. Kept as JSON rather than separate rows because these are
+  // options on the *same* dish (order the same thing, pay a different
+  // amount for a different protein/portion), not distinct menu items.
+  priceVariants Json?
   sortOrder   Int     @default(0)
 
   createdAt DateTime @default(now())

@@ -5,6 +5,7 @@ import { api, ApiRequestError } from "@/lib/api";
 import { useToast } from "@/context/ToastContext";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { MenuItemDrawer } from "@/components/admin/MenuItemDrawer";
+import { formatMenuPrice } from "@/lib/utils";
 import type { AdminMenuCategory, AdminMenuItem, AdminMenuResponse } from "@/types/admin";
 
 /** How long a removed dish waits before it's actually deleted server-side —
@@ -214,7 +215,7 @@ export function AdminMenuTab() {
                           {item.description}
                         </div>
                       </td>
-                      <td className="px-5 py-3 whitespace-nowrap text-foreground">ZMW {item.price}</td>
+                      <td className="px-5 py-3 whitespace-nowrap text-foreground">{formatMenuPrice(item)}</td>
                       <td className="px-5 py-3">
                         <div className="flex flex-wrap gap-1.5">
                           {item.badges.map((b) => (

@@ -7,14 +7,23 @@ import { stringParam } from "../utils/params";
 import { branchCodeSchema } from "../validators/reservation.validator";
 import { menuItemBodySchema, updateMenuItemBodySchema } from "../validators/menu.validator";
 
+type PriceVariant = { label: string; price: number };
+
+function serializePriceVariants(item: MenuItem): PriceVariant[] | undefined {
+  const variants = item.priceVariants as PriceVariant[] | null;
+  return variants?.length ? variants : undefined;
+}
+
 function serializePublicItem(item: MenuItem) {
   return {
     id: String(item.id),
     name: item.name,
     description: item.description,
     price: Number(item.price),
+    priceLabel: item.priceLabel ?? undefined,
     veg: item.veg,
     badges: (item.badges as string[] | null) ?? [],
+    priceVariants: serializePriceVariants(item),
   };
 }
 
@@ -26,8 +35,10 @@ function serializeAdminItem(item: MenuItem) {
     name: item.name,
     description: item.description,
     price: Number(item.price),
+    priceLabel: item.priceLabel ?? undefined,
     veg: item.veg,
     badges: (item.badges as string[] | null) ?? [],
+    priceVariants: serializePriceVariants(item),
   };
 }
 
@@ -94,8 +105,10 @@ export async function createMenuItem(req: Request, res: Response) {
       name: input.name,
       description: input.description,
       price: input.price,
+      priceLabel: input.priceLabel ?? null,
       veg: input.veg,
       badges: input.badges.length ? input.badges : Prisma.JsonNull,
+      priceVariants: input.priceVariants?.length ? input.priceVariants : Prisma.JsonNull,
       sortOrder: (maxSort._max.sortOrder ?? -1) + 1,
     },
   });
@@ -126,8 +139,12 @@ export async function updateMenuItem(req: Request, res: Response) {
       ...(input.name !== undefined && { name: input.name }),
       ...(input.description !== undefined && { description: input.description }),
       ...(input.price !== undefined && { price: input.price }),
+      ...(input.priceLabel !== undefined && { priceLabel: input.priceLabel }),
       ...(input.veg !== undefined && { veg: input.veg }),
       ...(input.badges !== undefined && { badges: input.badges.length ? input.badges : Prisma.JsonNull }),
+      ...(input.priceVariants !== undefined && {
+        priceVariants: input.priceVariants?.length ? input.priceVariants : Prisma.JsonNull,
+      }),
     },
   });
 
