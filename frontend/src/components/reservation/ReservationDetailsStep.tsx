@@ -2,7 +2,14 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Users2, PartyPopper, CalendarClock } from "lucide-react";
 import type { ReservationFormData, TimeSlot } from "@/data/reservation";
-import { TIME_SLOTS, EVENT_TYPES, getSlotAvailability, isSlotBookable, MAX_ADVANCE_HOURS } from "@/data/reservation";
+import {
+  TIME_SLOTS,
+  EVENT_TYPES,
+  getSlotAvailability,
+  isSlotBookable,
+  getRecurringClosureShortLabel,
+  MAX_ADVANCE_HOURS,
+} from "@/data/reservation";
 import type { Branch, BranchId } from "@/types";
 import { api } from "@/lib/api";
 import { useToast } from "@/context/ToastContext";
@@ -178,7 +185,7 @@ export function ReservationDetailsStep({ branch, data, errors, onChange, onNext,
                   {t}
                   {availability === "past" ? " (already passed)" : ""}
                   {availability === "too-far" ? " (more than 24h away)" : ""}
-                  {availability === "closed" ? " (closed — 2nd/3rd Monday)" : ""}
+                  {availability === "closed" ? ` (closed — ${getRecurringClosureShortLabel(branch.id)})` : ""}
                 </option>
               );
             })}

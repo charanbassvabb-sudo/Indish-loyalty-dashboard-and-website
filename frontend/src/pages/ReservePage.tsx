@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { branches } from "@/data/branches";
-import { emptyReservationForm, isSlotBookable, isLusakaRecurringClosure, MAX_ADVANCE_HOURS } from "@/data/reservation";
+import { emptyReservationForm, isSlotBookable, isRecurringlyClosed, getRecurringClosureNote, MAX_ADVANCE_HOURS } from "@/data/reservation";
 import type { ReservationFormData } from "@/data/reservation";
 import { ReservationDetailsStep } from "@/components/reservation/ReservationDetailsStep";
 import { ReservationPaymentStep, type PaymentUploadResult } from "@/components/reservation/ReservationPaymentStep";
@@ -35,8 +35,8 @@ function validateDetails(data: ReservationFormData, branchId: BranchId): Errors 
   if (!data.date) errors.date = "Date is required";
   if (!data.time) errors.time = "Please select a time";
   if (data.date && data.time && !isSlotBookable(data.date, data.time, branchId)) {
-    errors.date = isLusakaRecurringClosure(data.date, branchId)
-      ? "We're closed on the 2nd and 3rd Monday of the month — please pick another date"
+    errors.date = isRecurringlyClosed(data.date, branchId)
+      ? `${getRecurringClosureNote(branchId)} — please pick another date`
       : `Reservations can only be made up to ${MAX_ADVANCE_HOURS} hours in advance`;
   }
   if (data.guests < 1 || data.guests > 40) errors.guests = "Guests must be between 1 and 40";

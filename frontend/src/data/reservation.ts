@@ -67,19 +67,47 @@ export const MAX_ADVANCE_HOURS = 24;
 export type SlotAvailability = "bookable" | "past" | "too-far" | "closed";
 
 /**
- * Lusaka is closed on the 2nd and 3rd Monday of every month — a fixed,
- * permanent recurring closure (not a manual admin toggle), so it's computed
- * here rather than tracked as one-off dates. Mirrored server-side in
- * isLusakaRecurringClosure (backend/src/utils/branchHours.ts), which is what
- * actually enforces it — this client-side copy just gives immediate
- * feedback in the time-slot picker instead of waiting for a rejected submit.
+ * Fixed, permanent recurring closures per branch (not a manual admin
+ * toggle), so they're computed here rather than tracked as one-off dates.
+ * Mirrored server-side in isRecurringlyClosed (backend/src/utils/branchHours.ts),
+ * which is what actually enforces it — this client-side copy just gives
+ * immediate feedback in the time-slot picker instead of waiting for a
+ * rejected submit.
+ *
+ * weekday: 0=Sunday..6=Saturday. occurrences: which numbered occurrence(s)
+ * of that weekday in the month count as closed (1st, 2nd, 3rd...).
  */
-export function isLusakaRecurringClosure(date: string, branchId: BranchId): boolean {
-  if (branchId !== "lusaka" || !date) return false;
+const RECURRING_CLOSURES: Record<BranchId, { weekday: number; occurrences: number[]; note: string; shortLabel: string }> = {
+  lusaka: {
+    weekday: 1,
+    occurrences: [2, 3],
+    note: "We're closed on the 2nd and 3rd Monday of the month",
+    shortLabel: "2nd & 3rd Mon",
+  },
+  kitwe: {
+    weekday: 2,
+    occurrences: [2],
+    note: "We're closed on the 2nd Tuesday of the month",
+    shortLabel: "2nd Tue",
+  },
+};
+
+export function isRecurringlyClosed(date: string, branchId: BranchId): boolean {
+  const rule = RECURRING_CLOSURES[branchId];
+  if (!rule || !date) return false;
   const d = new Date(`${date}T12:00:00Z`); // midday UTC — immune to timezone drift
-  if (d.getUTCDay() !== 1) return false; // 1 = Monday
+  if (d.getUTCDay() !== rule.weekday) return false;
   const occurrence = Math.ceil(d.getUTCDate() / 7);
-  return occurrence === 2 || occurrence === 3;
+  return rule.occurrences.includes(occurrence);
+}
+
+export function getRecurringClosureNote(branchId: BranchId): string {
+  return RECURRING_CLOSURES[branchId]?.note ?? "We're closed that day";
+}
+
+/** Compact form for inline use, e.g. a <select> option label — "2nd Tue" instead of the full sentence. */
+export function getRecurringClosureShortLabel(branchId: BranchId): string {
+  return RECURRING_CLOSURES[branchId]?.shortLabel ?? "closed";
 }
 
 // Time slots are always restaurant-local (Africa/Lusaka, UTC+2, no DST)
@@ -90,7 +118,7 @@ export function isLusakaRecurringClosure(date: string, branchId: BranchId): bool
 // (isWithinBookingWindow in validators/reservation.validator.ts), which
 // runs on a UTC server and had the same bug the other direction.
 export function getSlotAvailability(date: string, time: string, branchId: BranchId): SlotAvailability {
-  if (isLusakaRecurringClosure(date, branchId)) return "closed";
+  if (isRecurringlyClosed(date, branchId)) return "closed";
   const target = new Date(`${date}T${time}:00+02:00`);
   const now = new Date();
   const maxDate = new Date(now.getTime() + MAX_ADVANCE_HOURS * 60 * 60 * 1000);

@@ -33,7 +33,7 @@ export const branches: Record<Branch["id"], Branch> = {
     id: "kitwe",
     name: "Indish — Kitwe",
     tagline: "Copperbelt's most loved curries and biryani",
-    address: "Shop No. 32, ECL Mall, Block B / Unit 10, next to Sikale Wood, Parklands, Kitwe, Zambia",
+    address: "Shop No. 32, Food Court, ECL Mall, Parklands, Kitwe, Zambia",
     plusCode: "56R6+PJ Kitwe",
     phone: "0963240240",
     rating: 4.4,
@@ -50,7 +50,12 @@ export const branches: Record<Branch["id"], Branch> = {
       "kitwe-lounge-seating.jpg",
       "kitwe-entrance.jpg",
     ],
-    hours: "11:30 – 22:00 daily",
+    // Mon–Thu and Fri–Sun differ, and Kitwe is additionally closed on the
+    // 2nd Tuesday of every month (see isRecurringlyClosed in
+    // data/reservation.ts, enforced automatically — not a manual admin
+    // toggle — and mirrored server-side in reservation.validator.ts /
+    // availability.controller.ts).
+    hours: "Mon–Thu 11:00–22:00 · Fri–Sun 11:00–22:30 (closed 2nd Tue of the month)",
   },
 };
 

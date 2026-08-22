@@ -2,7 +2,7 @@ import type { Request, Response } from "express";
 import { z } from "zod";
 import { prisma } from "../lib/prisma";
 import { ApiError } from "../utils/ApiError";
-import { isLusakaRecurringClosure, LUSAKA_CLOSURE_NOTE } from "../utils/branchHours";
+import { isRecurringlyClosed, getRecurringClosureNote } from "../utils/branchHours";
 
 /** Every calendar date from `from` to `to` inclusive, as YYYY-MM-DD strings. */
 function eachDate(from: string, to: string): string[] {
@@ -60,15 +60,19 @@ export async function getPublicAvailability(req: Request, res: Response) {
     }),
   );
 
-  // Lusaka's 2nd/3rd-Monday closure is a fixed recurring rule, not a staff-set
-  // override — surface it here too (as if it were a fullyBooked row) so the
-  // "seats left" banner shows "Closed" before the customer even tries to
-  // submit, without anyone having to remember to add DailyAvailability rows
-  // every month. Takes precedence over any stale override for the same date.
-  if ((!query.branch || query.branch === "LUSAKA") && query.from && query.to) {
-    for (const date of eachDate(query.from, query.to)) {
-      if (isLusakaRecurringClosure(date, "LUSAKA")) {
-        byKey.set(`LUSAKA|${date}`, { branch: "LUSAKA", date, seatsLeft: 0, fullyBooked: true, note: LUSAKA_CLOSURE_NOTE });
+  // Each branch's recurring closure (Lusaka: 2nd/3rd Monday, Kitwe: 2nd
+  // Tuesday) is a fixed rule, not a staff-set override — surface it here too
+  // (as if it were a fullyBooked row) so the "seats left" banner shows
+  // "Closed" before the customer even tries to submit, without anyone having
+  // to remember to add DailyAvailability rows every month. Takes precedence
+  // over any stale override for the same date.
+  if (query.from && query.to) {
+    const branchesToCheck = query.branch ? [query.branch] : (["LUSAKA", "KITWE"] as const);
+    for (const branch of branchesToCheck) {
+      for (const date of eachDate(query.from, query.to)) {
+        if (isRecurringlyClosed(date, branch)) {
+          byKey.set(`${branch}|${date}`, { branch, date, seatsLeft: 0, fullyBooked: true, note: getRecurringClosureNote(branch) });
+        }
       }
     }
   }
