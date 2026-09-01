@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { LogOut, CalendarCheck2, BarChart3, ClipboardList, PenSquare, ExternalLink, CreditCard, UtensilsCrossed, KeyRound, ShoppingBag, PartyPopper } from "lucide-react";
+import { LogOut, CalendarCheck2, BarChart3, ClipboardList, PenSquare, ExternalLink, CreditCard, UtensilsCrossed, KeyRound, ShoppingBag, PartyPopper, Activity } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAdminAuth } from "@/context/AdminAuthContext";
@@ -110,6 +110,13 @@ export default function AdminDashboardPage() {
 
           <div className="flex items-center gap-3">
             <AdminClock />
+            <Link
+              to="/admin/status"
+              className="flex items-center gap-1.5 rounded-full border border-border p-2.5 text-muted-foreground transition-colors hover:border-primary hover:text-primary sm:px-4 sm:py-2"
+            >
+              <Activity className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Status</span>
+            </Link>
             <a
               href={LOYALTY_APP_URL}
               target="_blank"

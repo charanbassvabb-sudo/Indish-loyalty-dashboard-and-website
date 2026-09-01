@@ -73,3 +73,21 @@ jobs:
           sleep 3
           curl -sf https://indishzambia.com/api/health
           curl -sf -o /dev/null https://indishzambia.com/
+
+      # Feeds the "Status" page in the admin app (Admin → Status) — lets the
+      # client see the last deploy (what/when/who) from their phone without
+      # touching GitHub Actions. Reuses the same SSH connection rather than
+      # adding a webhook + another secret.
+      - name: Record deploy
+        env:
+          SSH_OPTS: -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no
+        run: |
+          PAYLOAD=$(jq -nc \
+            --arg sha "${{ github.sha }}" \
+            --arg message "${{ github.event.head_commit.message }}" \
+            --arg actor "${{ github.actor }}" \
+            --arg time "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            '{sha:$sha,message:$message,actor:$actor,time:$time,status:"success"}')
+          B64=$(printf '%s' "$PAYLOAD" | base64 -w0)
+          ssh $SSH_OPTS "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
+            "echo $B64 | base64 -d >> /var/www/indish/deploy-log.jsonl && tail -n 20 /var/www/indish/deploy-log.jsonl > /var/www/indish/deploy-log.jsonl.tmp && mv /var/www/indish/deploy-log.jsonl.tmp /var/www/indish/deploy-log.jsonl"
