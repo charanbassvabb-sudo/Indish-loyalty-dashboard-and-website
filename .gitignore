@@ -18,3 +18,10 @@ npm-debug.log*
 Thumbs.db
 
 *.tsbuildinfo
+
+# Local working directories — raw asset dumps / one-off staging folders, not
+# part of the deployed app (menu photos get applied straight to the server's
+# uploads dir, not checked into the repo).
+/Menu-images/
+/menu-photo-stage6/
+/qr-codes/

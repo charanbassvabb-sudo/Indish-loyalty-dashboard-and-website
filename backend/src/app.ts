@@ -14,6 +14,10 @@ import menuRoutes from "./routes/menu.routes";
 import authRoutes from "./routes/auth.routes";
 import publicRoutes from "./routes/public.routes";
 import whatsappRoutes from "./routes/whatsapp.routes";
+import takeawayRoutes from "./routes/takeaway.routes";
+import adminTakeawayRoutes from "./routes/admin.takeaway.routes";
+import cateringRoutes from "./routes/catering.routes";
+import adminCateringRoutes from "./routes/admin.catering.routes";
 
 export function createApp() {
   const app = express();
@@ -56,9 +60,13 @@ export function createApp() {
 
   app.use("/api/whatsapp", whatsappRoutes);
   app.use("/api/reservations", reservationRoutes);
+  app.use("/api/takeaway-orders", takeawayRoutes);
+  app.use("/api/catering", cateringRoutes);
   app.use("/api/admin/auth", authRoutes);
   app.use("/api/admin/payment-attempts", paymentRoutes);
   app.use("/api/admin/menu", menuRoutes);
+  app.use("/api/admin/takeaway-orders", adminTakeawayRoutes);
+  app.use("/api/admin/catering", adminCateringRoutes);
   app.use("/api/admin", adminRoutes);
   app.use("/api", publicRoutes);
 

@@ -7,6 +7,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { BranchProvider } from "@/context/BranchContext";
 import { SiteContentProvider } from "@/context/SiteContentContext";
 import { ToastProvider } from "@/context/ToastContext";
+import { BasketProvider } from "@/context/BasketContext";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -15,7 +16,9 @@ createRoot(document.getElementById("root")!).render(
         <SiteContentProvider>
           <BranchProvider>
             <ToastProvider>
-              <App />
+              <BasketProvider>
+                <App />
+              </BasketProvider>
             </ToastProvider>
           </BranchProvider>
         </SiteContentProvider>
