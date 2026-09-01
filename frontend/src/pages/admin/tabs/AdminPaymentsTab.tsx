@@ -89,7 +89,7 @@ export function AdminPaymentsTab({ onChanged }: { onChanged?: () => void }) {
       )}
 
       <div className="card-warm overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="hidden overflow-x-auto sm:block">
           <table className="w-full text-left text-sm">
             <thead className="sticky top-0 z-10 border-b border-border bg-card/95 text-xs uppercase tracking-wide text-muted-foreground backdrop-blur-sm">
               <tr>
@@ -167,6 +167,64 @@ export function AdminPaymentsTab({ onChanged }: { onChanged?: () => void }) {
                 })}
             </tbody>
           </table>
+        </div>
+
+        <div className="divide-y divide-border/60 sm:hidden">
+          {loading &&
+            Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="p-4">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="mt-2 h-3.5 w-40" />
+                <Skeleton className="mt-2 h-3.5 w-48" />
+              </div>
+            ))}
+          {!loading && data?.attempts.length === 0 && (
+            <p className="flex flex-col items-center gap-2 px-5 py-10 text-center text-sm text-muted-foreground">
+              <ImageOff className="h-6 w-6" />
+              No payments match these filters.
+            </p>
+          )}
+          {!loading &&
+            data?.attempts.map((a, i) => {
+              const info = paymentAttemptOrderInfo(a);
+              return (
+                <motion.button
+                  key={`${a.id ?? "wait"}-${info.kind}-${info.id}`}
+                  type="button"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: i * 0.02 }}
+                  onClick={() => setSelected(a)}
+                  className="flex w-full flex-col gap-1.5 p-4 text-left transition-colors active:bg-secondary/60"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="font-semibold text-foreground">{info.customerName}</span>
+                    <span
+                      className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-[0.65rem] font-bold uppercase tracking-wide ${PAYMENT_STATUS_STYLE[a.paymentStatus]}`}
+                    >
+                      {PAYMENT_STATUS_LABEL[a.paymentStatus]}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{info.phone}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {info.reference}
+                    {info.kind === "TAKEAWAY" && (
+                      <span className="ml-1.5 rounded-full bg-secondary px-1.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-wide text-secondary-foreground">
+                        Takeaway
+                      </span>
+                    )}
+                    {" · "}
+                    {info.branchName.replace("Indish — ", "")}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Expected {info.amountLabel} · Detected {a.extracted?.amount ? `ZMW ${a.extracted.amount}` : "—"}
+                  </p>
+                  {a.extracted?.transactionId && (
+                    <p className="font-mono text-[0.7rem] text-muted-foreground">{a.extracted.transactionId}</p>
+                  )}
+                </motion.button>
+              );
+            })}
         </div>
 
         <div className="flex items-center justify-between border-t border-border px-5 py-4 text-sm text-muted-foreground">

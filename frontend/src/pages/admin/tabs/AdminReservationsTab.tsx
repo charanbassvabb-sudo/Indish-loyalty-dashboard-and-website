@@ -182,7 +182,11 @@ export function AdminReservationsTab({
       </div>
 
       <div className="card-warm overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Desktop/tablet: full table. A 7-column table just doesn't fit a
+            phone screen usefully even with horizontal scroll — the status
+            pill (the thing you actually came here to check) would be several
+            swipes away — so phones get the stacked card list below instead. */}
+        <div className="hidden overflow-x-auto sm:block">
           <table className="w-full text-left text-sm">
             <thead className="sticky top-0 z-10 border-b border-border bg-card/95 text-xs uppercase tracking-wide text-muted-foreground backdrop-blur-sm">
               <tr>
@@ -248,6 +252,51 @@ export function AdminReservationsTab({
                 ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Phone: one card per reservation, most important info first. */}
+        <div className="divide-y divide-border/60 sm:hidden">
+          {loading &&
+            Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="p-4">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="mt-2 h-3.5 w-40" />
+                <Skeleton className="mt-2 h-3.5 w-48" />
+              </div>
+            ))}
+          {!loading && data?.reservations.length === 0 && (
+            <p className="px-5 py-10 text-center text-sm text-muted-foreground">No reservations match these filters.</p>
+          )}
+          {!loading &&
+            data?.reservations.map((r, i) => (
+              <motion.button
+                key={r.id}
+                type="button"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: i * 0.02 }}
+                onClick={() => setSelected(r)}
+                className="flex w-full flex-col gap-1.5 p-4 text-left transition-colors active:bg-secondary/60"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <span className="flex items-center gap-1.5 font-semibold text-foreground">
+                    {r.reference}
+                    {r.bookingType === "PARTY" && (
+                      <PartyPopper className="h-3.5 w-3.5 shrink-0 text-primary" aria-label="Party booking" />
+                    )}
+                  </span>
+                  <StatusQuickMenu status={r.status} onChange={(next) => changeStatusWithUndo(r, next)} />
+                </div>
+                <p className="text-sm text-foreground">{r.customerName}</p>
+                <p className="text-xs text-muted-foreground">
+                  {r.branch.name.replace("Indish — ", "")} · {formatReservationDate(r.date, { withWeekday: false })} ·{" "}
+                  {r.time}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {r.guests} guest{r.guests === 1 ? "" : "s"} · ZMW {r.depositAmount} deposit
+                </p>
+              </motion.button>
+            ))}
         </div>
 
         <div className="flex items-center justify-between border-t border-border px-5 py-4 text-sm text-muted-foreground">

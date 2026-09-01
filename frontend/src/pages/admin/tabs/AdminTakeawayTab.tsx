@@ -94,7 +94,7 @@ export function AdminTakeawayTab({ onOrderChanged }: { onOrderChanged?: () => vo
       </div>
 
       <div className="card-warm overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="hidden overflow-x-auto sm:block">
           <table className="w-full text-left text-sm">
             <thead className="sticky top-0 z-10 border-b border-border bg-card/95 text-xs uppercase tracking-wide text-muted-foreground backdrop-blur-sm">
               <tr>
@@ -164,6 +164,53 @@ export function AdminTakeawayTab({ onOrderChanged }: { onOrderChanged?: () => vo
                 ))}
             </tbody>
           </table>
+        </div>
+
+        <div className="divide-y divide-border/60 sm:hidden">
+          {loading &&
+            Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="p-4">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="mt-2 h-3.5 w-40" />
+                <Skeleton className="mt-2 h-3.5 w-48" />
+              </div>
+            ))}
+          {!loading && data?.orders.length === 0 && (
+            <p className="px-5 py-10 text-center text-sm text-muted-foreground">No takeaway orders match these filters.</p>
+          )}
+          {!loading &&
+            data?.orders.map((o, i) => (
+              <motion.button
+                key={o.id}
+                type="button"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: i * 0.02 }}
+                onClick={() => setSelected(o)}
+                className="flex w-full flex-col gap-1.5 p-4 text-left transition-colors active:bg-secondary/60"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <span className="font-semibold text-foreground">{o.reference}</span>
+                  <span
+                    className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-[0.65rem] font-bold uppercase tracking-wide ${TAKEAWAY_STATUS_STYLE[o.status]}`}
+                  >
+                    {TAKEAWAY_STATUS_LABEL[o.status]}
+                  </span>
+                </div>
+                <p className="text-sm text-foreground">{o.customerName}</p>
+                <p className="text-xs text-muted-foreground">
+                  {o.branch.name.replace("Indish — ", "")} · Pickup {o.pickupDate.slice(0, 10)} · {o.pickupTime}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {o.items.length} item{o.items.length === 1 ? "" : "s"} · ZMW {o.totalAmount}
+                  {o.discount && (
+                    <span className="ml-1.5 rounded-full bg-primary/15 px-1.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-wide text-primary">
+                      Discounted
+                    </span>
+                  )}
+                </p>
+              </motion.button>
+            ))}
         </div>
 
         <div className="flex items-center justify-between border-t border-border px-5 py-4 text-sm text-muted-foreground">
