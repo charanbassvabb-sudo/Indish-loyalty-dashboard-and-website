@@ -67,6 +67,7 @@ function summarizeRecentErrors(): { summary: string; count: number; lastSeen: st
 
     const key = line
       .replace(m[1], "")
+      .replace(/^:\s*/, "")
       .replace(/\+?\d{9,}/g, "<number>")
       .replace(/wamid\.[A-Za-z0-9+/=]+/g, "<msg-id>")
       .slice(0, 140);
