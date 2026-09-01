@@ -1,0 +1,75 @@
+name: Deploy to production
+
+# Runs on every push to main, or manually from the Actions tab (including
+# GitHub's mobile app — useful for re-running a deploy without a new commit).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+# Never run two deploys at once against the same droplet.
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Built on the runner, not the droplet — keeps the small production
+      # server from having to do a Vite build on every deploy.
+      - name: Build frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npx vite build
+
+      - name: Set up deploy key
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+      # Backend is built ON the droplet (matches how every deploy this
+      # project has had so far actually worked) — sync source only, then
+      # run npm ci + tsc there in the next step.
+      - name: Sync backend source
+        working-directory: backend
+        env:
+          SSH_OPTS: -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no
+        run: |
+          rsync -az --delete -e "ssh $SSH_OPTS" src/ "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/var/www/indish/backend/src/"
+          rsync -az --delete -e "ssh $SSH_OPTS" prisma/ "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/var/www/indish/backend/prisma/"
+          rsync -az -e "ssh $SSH_OPTS" package.json package-lock.json tsconfig.json "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/var/www/indish/backend/"
+
+      - name: Sync frontend build
+        env:
+          SSH_OPTS: -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no
+        run: |
+          rsync -az --delete -e "ssh $SSH_OPTS" frontend/dist/ "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/var/www/indish/frontend/dist/"
+
+      - name: Install deps, migrate, build backend, restart
+        env:
+          SSH_OPTS: -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no
+        run: |
+          ssh $SSH_OPTS "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" '
+            set -e
+            cd /var/www/indish/backend
+            npm ci
+            npx prisma generate
+            npx prisma migrate deploy
+            npm run build
+            pm2 restart indish-api --update-env
+          '
+
+      - name: Verify
+        run: |
+          sleep 3
+          curl -sf https://indishzambia.com/api/health
+          curl -sf -o /dev/null https://indishzambia.com/
