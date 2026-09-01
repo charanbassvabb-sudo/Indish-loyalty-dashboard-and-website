@@ -3,7 +3,6 @@ import { Leaf } from "lucide-react";
 import type { MenuItem } from "@/types";
 import { useTiltSpotlight } from "@/hooks/useTiltSpotlight";
 import { formatMenuPrice } from "@/lib/utils";
-import { BlurImage } from "@/components/ui/BlurImage";
 
 const badgeStyles: Record<string, string> = {
   Signature: "bg-gradient-ember text-primary-foreground",
@@ -32,15 +31,6 @@ export function MenuCard({ item, onSelect }: { item: MenuItem; onSelect: (item: 
       style={tilt.style}
       className="card-warm spotlight-card group flex w-full flex-col gap-3 overflow-hidden p-5 text-left transition-shadow hover:shadow-warm"
     >
-      {item.imageUrl && (
-        <BlurImage
-          src={item.imageUrl}
-          alt={item.name}
-          className="-mx-5 -mt-5 mb-1 aspect-[4/3] w-[calc(100%+2.5rem)]"
-          imgClassName="transition-transform duration-500 group-hover:scale-105"
-        />
-      )}
-
       <div className="relative z-10 flex items-start justify-between gap-3">
         <h3 className="font-display text-lg text-foreground transition-colors group-hover:text-primary md:text-xl">
           {item.name}

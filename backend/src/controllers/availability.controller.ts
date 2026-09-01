@@ -143,7 +143,7 @@ export async function upsertAvailability(req: Request, res: Response) {
       seatsLeft: input.seatsLeft ?? null,
       fullyBooked: input.fullyBooked ?? false,
       note: input.note || null,
-      updatedByName: req.admin?.email ?? null,
+      updatedByName: req.admin?.username ?? null,
     },
     create: {
       branchId: branch.id,
@@ -151,7 +151,7 @@ export async function upsertAvailability(req: Request, res: Response) {
       seatsLeft: input.seatsLeft ?? null,
       fullyBooked: input.fullyBooked ?? false,
       note: input.note || null,
-      updatedByName: req.admin?.email ?? null,
+      updatedByName: req.admin?.username ?? null,
     },
     include: { branch: true },
   });

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { LogOut, CalendarCheck2, BarChart3, ClipboardList, PenSquare, ExternalLink, CreditCard, UtensilsCrossed, KeyRound } from "lucide-react";
+import { LogOut, CalendarCheck2, BarChart3, ClipboardList, PenSquare, ExternalLink, CreditCard, UtensilsCrossed, KeyRound, ShoppingBag, PartyPopper } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAdminAuth } from "@/context/AdminAuthContext";
@@ -7,6 +7,8 @@ import { LOYALTY_APP_URL } from "@/lib/loyalty";
 import { api } from "@/lib/api";
 import { AdminReservationsTab } from "./tabs/AdminReservationsTab";
 import { AdminPaymentsTab } from "./tabs/AdminPaymentsTab";
+import { AdminTakeawayTab } from "./tabs/AdminTakeawayTab";
+import { AdminCateringTab } from "./tabs/AdminCateringTab";
 import { AdminMenuTab } from "./tabs/AdminMenuTab";
 import { AdminReportsTab } from "./tabs/AdminReportsTab";
 import { AdminAvailabilityTab } from "./tabs/AdminAvailabilityTab";
@@ -17,10 +19,12 @@ import { AdminClock } from "@/components/admin/AdminClock";
 import { ChangePasswordModal } from "@/components/admin/ChangePasswordModal";
 import logo from "@/assets/images/logo.png";
 
-type Tab = "reservations" | "payments" | "menu" | "reports" | "availability" | "content";
+type Tab = "reservations" | "takeaway" | "catering" | "payments" | "menu" | "reports" | "availability" | "content";
 
 const TABS: { id: Tab; label: string; icon: typeof ClipboardList }[] = [
   { id: "reservations", label: "Reservations", icon: ClipboardList },
+  { id: "takeaway", label: "Takeaway", icon: ShoppingBag },
+  { id: "catering", label: "Catering", icon: PartyPopper },
   { id: "payments", label: "Payments", icon: CreditCard },
   { id: "menu", label: "Menu", icon: UtensilsCrossed },
   { id: "reports", label: "Reports", icon: BarChart3 },
@@ -149,8 +153,6 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        <ChangePasswordModal open={changePasswordOpen} onClose={() => setChangePasswordOpen(false)} />
-
         <nav className="mx-auto flex max-w-7xl gap-1 overflow-x-auto px-6 md:px-10" aria-label="Admin sections">
           {TABS.map((t) => (
             <button
@@ -184,6 +186,13 @@ export default function AdminDashboardPage() {
         </nav>
       </div>
 
+      {/* Rendered here, outside the backdrop-blur-md header above — that
+          `backdrop-filter` establishes a new containing block for any
+          `position: fixed` descendant (same rule as `transform`/`filter`),
+          which was pinning this modal's fixed inset-0 backdrop to the
+          header's own small bounding box instead of the real viewport. */}
+      <ChangePasswordModal open={changePasswordOpen} onClose={() => setChangePasswordOpen(false)} />
+
       <div className="relative z-10 mx-auto max-w-7xl px-6 py-8 md:px-10">
         <AnimatePresence mode="wait">
           <motion.div
@@ -196,6 +205,8 @@ export default function AdminDashboardPage() {
             {tab === "reservations" && (
               <AdminReservationsTab initialSearch={initialSearch} onReservationChanged={refreshPendingCount} />
             )}
+            {tab === "takeaway" && <AdminTakeawayTab />}
+            {tab === "catering" && <AdminCateringTab />}
             {tab === "payments" && (
               <AdminPaymentsTab
                 onChanged={() => {

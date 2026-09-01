@@ -2,16 +2,19 @@ import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { MenuCategory, MenuItem } from "@/types";
 import { MenuCard } from "./MenuCard";
-import { MenuItemModal } from "./MenuItemModal";
+import { MenuItemModal, type AddToBasketPayload } from "./MenuItemModal";
 
 type DietFilter = "all" | "veg" | "non-veg";
 
 export function MenuSection({
   categories: allCategories,
   compact = false,
+  onAddToBasket,
 }: {
   categories: MenuCategory[];
   compact?: boolean;
+  /** Only passed by the takeaway flow — see MenuItemModal. Absent here means plain read-only browsing, unchanged. */
+  onAddToBasket?: (payload: AddToBasketPayload) => void;
 }) {
   // An admin-managed category (e.g. Chef's Specials) can legitimately have
   // zero items most of the time — don't show a dead tab for it, and don't
@@ -105,7 +108,7 @@ export function MenuSection({
         </motion.div>
       </AnimatePresence>
 
-      <MenuItemModal item={selected} onClose={() => setSelected(null)} />
+      <MenuItemModal item={selected} onClose={() => setSelected(null)} onAddToBasket={onAddToBasket} />
     </section>
   );
 }

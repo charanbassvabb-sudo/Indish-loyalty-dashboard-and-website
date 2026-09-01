@@ -41,16 +41,21 @@ export function Footer() {
           </div>
 
           <div>
-            <p className="eyebrow mb-4">{branch ? branch.name : "Get in Touch"}</p>
-            <ul className="space-y-3 text-sm text-muted-foreground">
-              <li className="flex items-center gap-2">
-                <Phone className="h-3.5 w-3.5 text-primary" />
-                {branch ? branch.phone : "0976309999 · 0963240240"}
-              </li>
-              <li className="flex items-center gap-2">
-                <Clock className="h-3.5 w-3.5 text-primary" />
-                {branch ? branch.hours : "11:30 – 22:00 daily"}
-              </li>
+            <p className="eyebrow mb-4">Get in Touch</p>
+            <ul className="space-y-4">
+              {branchList.map((b) => (
+                <li key={b.id} className="text-sm text-muted-foreground">
+                  <span className="font-medium text-foreground">{b.name.replace("Indish — ", "")}</span>
+                  <span className="mt-1 flex items-center gap-1.5">
+                    <Phone className="h-3.5 w-3.5 shrink-0 text-primary" />
+                    {b.phone}
+                  </span>
+                  <span className="mt-1 flex items-start gap-1.5">
+                    <Clock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+                    {b.hours}
+                  </span>
+                </li>
+              ))}
             </ul>
           </div>
         </div>

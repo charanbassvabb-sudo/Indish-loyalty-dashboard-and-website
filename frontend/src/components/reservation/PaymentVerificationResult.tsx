@@ -1,9 +1,36 @@
 import { motion } from "framer-motion";
 import { CheckCircle2, Clock4, AlertTriangle, XCircle, Copy as CopyIcon } from "lucide-react";
-import type { PaymentUploadResult } from "./ReservationPaymentStep";
+
+/**
+ * Only the fields this component actually reads — deliberately not imported
+ * from ReservationPaymentStep's PaymentUploadResult, so TakeawayPaymentStep's
+ * result type (which has an `orderStatus` instead of `reservationStatus`)
+ * can be passed here too without an unrelated field forcing a mismatch.
+ * Both result types are structurally compatible with this one.
+ */
+export interface PaymentVerificationData {
+  status: "AUTO_VERIFIED" | "REQUIRES_REVIEW" | "PAYMENT_FAILED" | "DUPLICATE" | "PROCESSING";
+  expected: { amount: number; recipient: string };
+  extracted: {
+    amount: number | null;
+    transactionId: string | null;
+    sender: string | null;
+    recipient: string | null;
+    date: string | null;
+    time: string | null;
+    status: string;
+  };
+  matches: {
+    amount: boolean | null;
+    recipient: boolean | null;
+    status: boolean | null;
+    recency: boolean | null;
+    notDuplicate: boolean | null;
+  };
+}
 
 const STATUS_META: Record<
-  PaymentUploadResult["status"],
+  PaymentVerificationData["status"],
   { icon: typeof CheckCircle2; label: string; tone: string; message: string }
 > = {
   AUTO_VERIFIED: {
@@ -53,7 +80,7 @@ function MatchRow({ label, expected, detected, match }: { label: string; expecte
   );
 }
 
-export function PaymentVerificationResult({ result, internalPaymentId }: { result: PaymentUploadResult; internalPaymentId: string }) {
+export function PaymentVerificationResult({ result, internalPaymentId }: { result: PaymentVerificationData; internalPaymentId: string }) {
   const meta = STATUS_META[result.status];
 
   function copyId() {

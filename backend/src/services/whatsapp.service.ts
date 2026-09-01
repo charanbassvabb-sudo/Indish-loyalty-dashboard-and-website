@@ -15,6 +15,19 @@ interface ReservationWhatsAppPayload {
   notes?: string | null;
 }
 
+/** Mirrors ReservationWhatsAppPayload — see the sendTakeaway* functions below. */
+interface TakeawayWhatsAppPayload {
+  reference: string;
+  branchName: string;
+  branchCode: "LUSAKA" | "KITWE";
+  customerName: string;
+  phone: string;
+  pickupDate: string; // YYYY-MM-DD
+  pickupTime: string;
+  totalAmount: number;
+  notes?: string | null;
+}
+
 const GRAPH_API_BASE = "https://graph.facebook.com";
 
 // Appended to every customer-facing free-text message (staff messages don't
@@ -23,6 +36,14 @@ const GRAPH_API_BASE = "https://graph.facebook.com";
 // see the template bodies noted alongside WHATSAPP_TEMPLATE_NAME and friends
 // in .env.example. Keep this wording in sync with those Footer fields.
 const AUTOMATED_DISCLAIMER = "Automated message — replies & calls aren't monitored.";
+
+// All 11 takeaway/catering templates were submitted to Meta under "en_US"
+// (see the template-submission scripts from that session), unlike the
+// original reservation/loyalty templates which use env.WHATSAPP_TEMPLATE_LANGUAGE
+// ("en"). Passed explicitly to every sendWhatsAppTemplate call below —
+// omitting it sends the wrong language code and Meta 404s even though the
+// template is approved.
+const TAKEAWAY_CATERING_TEMPLATE_LANGUAGE = "en_US";
 
 function isConfigured() {
   return Boolean(env.WHATSAPP_PHONE_NUMBER_ID && env.WHATSAPP_ACCESS_TOKEN);
@@ -61,6 +82,15 @@ function toE164Zambia(raw: string): string {
   if (trimmed.startsWith("+")) return trimmed.replace(/[\s-]/g, "");
   const digits = trimmed.replace(/\D/g, "");
   if (digits.startsWith("0") && digits.length === 10) return `+260${digits.slice(1)}`;
+  // Someone typed the 9-digit local number without its leading 0 (e.g.
+  // "964599763" instead of "0964599763") — phone validation only requires
+  // 9+ digits (see auth/reservation/takeaway validators), so this reaches
+  // here un-normalized. Zambian mobile numbers all start with 7 or 9 after
+  // the leading 0/country code, so this is a safe heuristic rather than a
+  // guess at an arbitrary foreign number. Without this, the number falls
+  // through to `return trimmed` below — sent to Meta with no country code
+  // at all, which silently fails delivery instead of erroring loudly.
+  if (digits.length === 9 && /^[79]/.test(digits)) return `+260${digits}`;
   return trimmed;
 }
 
@@ -107,6 +137,17 @@ async function sendWhatsAppMessage(to: string, body: string): Promise<void> {
     if (!res.ok) {
       const errBody = await res.text();
       console.error(`[whatsapp] Failed to send to ${formattedTo}: ${res.status} ${errBody}`);
+    } else {
+      // Graph API returning 200 here only means the message was QUEUED, not
+      // that it was actually delivered — a free-text message to a number
+      // that hasn't messaged us within the last 24h gets silently accepted
+      // here and then fails later, reported async via the delivery-status
+      // webhook (see whatsapp.controller.ts, error code 131047). Logging the
+      // message id makes that webhook's later log line traceable back to
+      // this specific send instead of the whole thing looking silent.
+      const okBody = (await res.json().catch(() => null)) as { messages?: { id?: string }[] } | null;
+      const msgId = okBody?.messages?.[0]?.id;
+      console.log(`[whatsapp] Queued to ${formattedTo}${msgId ? ` (msg ${msgId})` : ""}`);
     }
   } catch (err) {
     console.error(`[whatsapp] Failed to send to ${formattedTo}:`, err);
@@ -152,6 +193,14 @@ async function sendWhatsAppTemplate(
   to: string,
   templateName: string,
   params: { type: "text"; text: string }[],
+  // Meta templates are versioned per exact language code, not just "does
+  // this read as English" — the original reservation/loyalty templates were
+  // submitted under "en" (env.WHATSAPP_TEMPLATE_LANGUAGE), but the takeaway
+  // and catering templates were submitted under "en_US". Sending the wrong
+  // code gets a 404 "(#132001) Template name does not exist in the
+  // translation" even though the template is APPROVED — it's a genuinely
+  // different lookup key to Meta, not a fallback/formatting concern.
+  language: string = env.WHATSAPP_TEMPLATE_LANGUAGE,
 ): Promise<void> {
   const formattedTo = toE164Zambia(to);
   if (!isConfigured()) {
@@ -174,7 +223,7 @@ async function sendWhatsAppTemplate(
           type: "template",
           template: {
             name: templateName,
-            language: { code: env.WHATSAPP_TEMPLATE_LANGUAGE },
+            language: { code: language },
             // Omit entirely for a zero-variable template (e.g. the
             // automated-notice follow-up) — sending an empty parameters
             // array for a template with no {{n}} placeholders isn't the
@@ -188,6 +237,10 @@ async function sendWhatsAppTemplate(
     if (!res.ok) {
       const errBody = await res.text();
       console.error(`[whatsapp] Template send failed for ${formattedTo}: ${res.status} ${errBody}`);
+    } else {
+      const okBody = (await res.json().catch(() => null)) as { messages?: { id?: string }[] } | null;
+      const msgId = okBody?.messages?.[0]?.id;
+      console.log(`[whatsapp] Template queued to ${formattedTo}${msgId ? ` (msg ${msgId})` : ""}`);
     }
   } catch (err) {
     console.error(`[whatsapp] Template send failed for ${formattedTo}:`, err);
@@ -426,4 +479,383 @@ export async function sendPaymentRejectedNotification(payload: ReservationWhatsA
     : sendWhatsAppMessage(payload.phone, formatRejectedMessage(payload));
 
   await send;
+}
+
+// ---------------------------------------------------------------------------
+// Takeaway orders — same shape/pattern as the reservation notifications
+// above: template-if-configured-else-free-text on every send (both customer
+// AND staff sides — reservations only wired templates onto some of their
+// functions; takeaway gets full coverage from the start), AUTOMATED_DISCLAIMER
+// on every free-text customer body, fire-and-forget from the controller.
+// Until each WHATSAPP_TAKEAWAY_*_TEMPLATE_NAME is submitted to and approved
+// by Meta, every one of these runs in free-text fallback — same 24h-session
+// limitation every other notification in this file started out with.
+// ---------------------------------------------------------------------------
+
+function formatTakeawayOrderCreatedMessage(p: TakeawayWhatsAppPayload): string {
+  return [
+    `We've received your takeaway order at ${p.branchName}.`,
+    `Ref: ${p.reference}`,
+    `Pickup: ${p.pickupDate} at ${p.pickupTime} — TAKEAWAY ONLY, NO DELIVERY.`,
+    `To confirm your order, pay ZMW ${p.totalAmount} via Airtel Money or MTN MoMo, then upload your payment screenshot on the order page. We start preparing once that's verified.`,
+    AUTOMATED_DISCLAIMER,
+  ].join("\n");
+}
+
+function buildTakeawayCreatedTemplateParams(p: TakeawayWhatsAppPayload) {
+  return [p.branchName, p.reference, p.pickupDate, p.pickupTime, String(p.totalAmount)].map((text) => ({
+    type: "text" as const,
+    text,
+  }));
+}
+
+function formatTakeawayStaffMessage(p: TakeawayWhatsAppPayload): string {
+  return [
+    `New takeaway order ${p.reference} — ${p.branchName} — awaiting payment`,
+    `${p.customerName} (${p.phone})`,
+    `Pickup: ${p.pickupDate} at ${p.pickupTime}`,
+    `Total: ZMW ${p.totalAmount}`,
+    p.notes ? `Notes: ${p.notes}` : null,
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+// Name+phone are combined into one variable — Meta rejected the 5-variable
+// version of this template as too variable-dense for its length ("Params
+// Words Ratio Exceeds Limit"), so name/phone collapse into a single {{3}}
+// here to match the approved-for-submission takeaway_staff_new_order body.
+function buildTakeawayStaffNewOrderTemplateParams(p: TakeawayWhatsAppPayload) {
+  return [p.reference, p.branchName, `${p.customerName} (${p.phone})`, String(p.totalAmount)].map((text) => ({
+    type: "text" as const,
+    text,
+  }));
+}
+
+/**
+ * Fired when a takeaway order is first created (PENDING_PAYMENT) — tells the
+ * customer their pickup time and how to pay, and pings that branch's staff.
+ * Mirrors sendBookingCreatedNotifications, but with template support on both
+ * sides from the start (see the header comment above).
+ */
+export async function sendTakeawayOrderCreatedNotifications(payload: TakeawayWhatsAppPayload) {
+  const customerSend = env.WHATSAPP_TAKEAWAY_CREATED_TEMPLATE_NAME
+    ? sendWhatsAppTemplate(
+        payload.phone,
+        env.WHATSAPP_TAKEAWAY_CREATED_TEMPLATE_NAME,
+        buildTakeawayCreatedTemplateParams(payload),
+        TAKEAWAY_CATERING_TEMPLATE_LANGUAGE,
+      )
+    : sendWhatsAppMessage(payload.phone, formatTakeawayOrderCreatedMessage(payload));
+
+  const sends: Promise<void>[] = [customerSend];
+
+  const staffNumbers = staffNumbersFor(payload.branchCode);
+  if (staffNumbers.length) {
+    for (const num of staffNumbers) {
+      const staffSend = env.WHATSAPP_TAKEAWAY_STAFF_NEW_ORDER_TEMPLATE_NAME
+        ? sendWhatsAppTemplate(
+            num,
+            env.WHATSAPP_TAKEAWAY_STAFF_NEW_ORDER_TEMPLATE_NAME,
+            buildTakeawayStaffNewOrderTemplateParams(payload),
+            TAKEAWAY_CATERING_TEMPLATE_LANGUAGE,
+          )
+        : sendWhatsAppMessage(num, formatTakeawayStaffMessage(payload));
+      sends.push(staffSend);
+    }
+  } else {
+    console.warn(`[whatsapp] No admin number configured for ${payload.branchCode} — skipped takeaway staff notification`);
+  }
+
+  await Promise.allSettled(sends);
+}
+
+function formatTakeawayUnderReviewMessage(p: TakeawayWhatsAppPayload): string {
+  return [
+    `Thanks — we've received your payment screenshot for ${p.reference} (${p.branchName}).`,
+    `We're double-checking a couple of details before we start preparing your order. You'll hear from us shortly.`,
+    AUTOMATED_DISCLAIMER,
+  ].join("\n");
+}
+
+function buildTakeawayUnderReviewTemplateParams(p: TakeawayWhatsAppPayload) {
+  return [p.reference, p.branchName].map((text) => ({ type: "text" as const, text }));
+}
+
+function formatTakeawayStaffReviewMessage(p: TakeawayWhatsAppPayload): string {
+  return [
+    `Takeaway payment needs review — ${p.reference} (${p.branchName})`,
+    `${p.customerName} (${p.phone})`,
+    `Total: ZMW ${p.totalAmount} — check the Payments tab in the admin dashboard.`,
+  ].join("\n");
+}
+
+function buildTakeawayStaffReviewTemplateParams(p: TakeawayWhatsAppPayload) {
+  return [p.reference, p.branchName, p.customerName, p.phone, String(p.totalAmount)].map((text) => ({
+    type: "text" as const,
+    text,
+  }));
+}
+
+/** Fired when a takeaway screenshot couldn't be confidently auto-verified. Mirrors sendPaymentUnderReviewNotifications. */
+export async function sendTakeawayPaymentUnderReviewNotifications(payload: TakeawayWhatsAppPayload) {
+  const customerSend = env.WHATSAPP_TAKEAWAY_UNDER_REVIEW_TEMPLATE_NAME
+    ? sendWhatsAppTemplate(
+        payload.phone,
+        env.WHATSAPP_TAKEAWAY_UNDER_REVIEW_TEMPLATE_NAME,
+        buildTakeawayUnderReviewTemplateParams(payload),
+        TAKEAWAY_CATERING_TEMPLATE_LANGUAGE,
+      )
+    : sendWhatsAppMessage(payload.phone, formatTakeawayUnderReviewMessage(payload));
+
+  const sends: Promise<void>[] = [customerSend];
+
+  const staffNumbers = staffNumbersFor(payload.branchCode);
+  if (staffNumbers.length) {
+    for (const num of staffNumbers) {
+      const staffSend = env.WHATSAPP_TAKEAWAY_STAFF_REVIEW_TEMPLATE_NAME
+        ? sendWhatsAppTemplate(
+            num,
+            env.WHATSAPP_TAKEAWAY_STAFF_REVIEW_TEMPLATE_NAME,
+            buildTakeawayStaffReviewTemplateParams(payload),
+            TAKEAWAY_CATERING_TEMPLATE_LANGUAGE,
+          )
+        : sendWhatsAppMessage(num, formatTakeawayStaffReviewMessage(payload));
+      sends.push(staffSend);
+    }
+  } else {
+    console.warn(`[whatsapp] No admin number configured for ${payload.branchCode} — skipped takeaway review alert`);
+  }
+
+  await Promise.allSettled(sends);
+}
+
+function formatTakeawayAutoRejectedMessage(p: TakeawayWhatsAppPayload, reason: string): string {
+  return [
+    `We couldn't confirm your payment for takeaway order ${p.reference} (${p.branchName}).`,
+    reason,
+    `Please upload a clear screenshot of a successful payment to try again, or contact us if you think this is a mistake.`,
+    AUTOMATED_DISCLAIMER,
+  ].join("\n");
+}
+
+function buildTakeawayAutoRejectedTemplateParams(p: TakeawayWhatsAppPayload, reason: string) {
+  return [p.reference, p.branchName, reason].map((text) => ({ type: "text" as const, text }));
+}
+
+/** Fired when the system rejects a takeaway screenshot outright (failed/duplicate transaction). */
+export async function sendTakeawayPaymentAutoRejectedNotification(payload: TakeawayWhatsAppPayload, reason: string) {
+  const send = env.WHATSAPP_TAKEAWAY_AUTO_REJECTED_TEMPLATE_NAME
+    ? sendWhatsAppTemplate(
+        payload.phone,
+        env.WHATSAPP_TAKEAWAY_AUTO_REJECTED_TEMPLATE_NAME,
+        buildTakeawayAutoRejectedTemplateParams(payload, reason),
+        TAKEAWAY_CATERING_TEMPLATE_LANGUAGE,
+      )
+    : sendWhatsAppMessage(payload.phone, formatTakeawayAutoRejectedMessage(payload, reason));
+
+  await send;
+}
+
+function formatTakeawayRequestNewScreenshotMessage(p: TakeawayWhatsAppPayload, notes?: string | null): string {
+  return [
+    `We need a clearer payment screenshot for your takeaway order ${p.reference} (${p.branchName}).`,
+    notes ? notes : `Please re-upload a screenshot showing the full transaction — amount, recipient, status, and date/time.`,
+    AUTOMATED_DISCLAIMER,
+  ].join("\n");
+}
+
+function buildTakeawayRequestScreenshotTemplateParams(p: TakeawayWhatsAppPayload, notes?: string | null) {
+  const detail =
+    notes?.trim() ||
+    "Please re-upload a screenshot showing the full transaction — amount, recipient, status, and date/time.";
+  return [p.reference, p.branchName, detail].map((text) => ({ type: "text" as const, text }));
+}
+
+/** Fired when a staff member asks for a clearer/different screenshot rather than rejecting outright. */
+export async function sendTakeawayRequestNewScreenshotNotification(
+  payload: TakeawayWhatsAppPayload,
+  notes?: string | null,
+) {
+  const send = env.WHATSAPP_TAKEAWAY_REQUEST_SCREENSHOT_TEMPLATE_NAME
+    ? sendWhatsAppTemplate(
+        payload.phone,
+        env.WHATSAPP_TAKEAWAY_REQUEST_SCREENSHOT_TEMPLATE_NAME,
+        buildTakeawayRequestScreenshotTemplateParams(payload, notes),
+        TAKEAWAY_CATERING_TEMPLATE_LANGUAGE,
+      )
+    : sendWhatsAppMessage(payload.phone, formatTakeawayRequestNewScreenshotMessage(payload, notes));
+
+  await send;
+}
+
+function formatTakeawayConfirmedMessage(p: TakeawayWhatsAppPayload): string {
+  return [
+    `Your takeaway order at ${p.branchName} is confirmed!`,
+    `Ref: ${p.reference}`,
+    `Pickup: ${p.pickupDate} at ${p.pickupTime} — TAKEAWAY ONLY, NO DELIVERY.`,
+    `Total paid: ZMW ${p.totalAmount}`,
+    AUTOMATED_DISCLAIMER,
+  ].join("\n");
+}
+
+function buildTakeawayConfirmedTemplateParams(p: TakeawayWhatsAppPayload) {
+  return [p.branchName, p.reference, p.pickupDate, p.pickupTime, String(p.totalAmount)].map((text) => ({
+    type: "text" as const,
+    text,
+  }));
+}
+
+/** Fired the moment a takeaway payment is confirmed (auto-verified or staff-approved). Mirrors sendPaymentConfirmedNotification. */
+export async function sendTakeawayPaymentConfirmedNotification(payload: TakeawayWhatsAppPayload) {
+  const send = env.WHATSAPP_TAKEAWAY_CONFIRMED_TEMPLATE_NAME
+    ? sendWhatsAppTemplate(
+        payload.phone,
+        env.WHATSAPP_TAKEAWAY_CONFIRMED_TEMPLATE_NAME,
+        buildTakeawayConfirmedTemplateParams(payload),
+        TAKEAWAY_CATERING_TEMPLATE_LANGUAGE,
+      )
+    : sendWhatsAppMessage(payload.phone, formatTakeawayConfirmedMessage(payload));
+
+  await send;
+}
+
+function formatTakeawayRejectedMessage(p: TakeawayWhatsAppPayload): string {
+  return [
+    `We couldn't verify payment for your takeaway order at ${p.branchName} (Ref: ${p.reference}).`,
+    `Please contact us so we can sort this out, or place a new order with a valid payment.`,
+    AUTOMATED_DISCLAIMER,
+  ].join("\n");
+}
+
+function buildTakeawayRejectedTemplateParams(p: TakeawayWhatsAppPayload) {
+  return [p.branchName, p.reference].map((text) => ({ type: "text" as const, text }));
+}
+
+/** Fired when a staff member reviews a takeaway payment and rejects it outright (cancelling the order). */
+export async function sendTakeawayPaymentRejectedNotification(payload: TakeawayWhatsAppPayload) {
+  const send = env.WHATSAPP_TAKEAWAY_REJECTED_TEMPLATE_NAME
+    ? sendWhatsAppTemplate(
+        payload.phone,
+        env.WHATSAPP_TAKEAWAY_REJECTED_TEMPLATE_NAME,
+        buildTakeawayRejectedTemplateParams(payload),
+        TAKEAWAY_CATERING_TEMPLATE_LANGUAGE,
+      )
+    : sendWhatsAppMessage(payload.phone, formatTakeawayRejectedMessage(payload));
+
+  await send;
+}
+
+function formatTakeawayReadyForPickupMessage(p: TakeawayWhatsAppPayload): string {
+  return [
+    `Your takeaway order ${p.reference} at ${p.branchName} is ready for pickup!`,
+    `Pickup time: ${p.pickupTime} — TAKEAWAY ONLY, NO DELIVERY.`,
+    AUTOMATED_DISCLAIMER,
+  ].join("\n");
+}
+
+function buildTakeawayReadyTemplateParams(p: TakeawayWhatsAppPayload) {
+  return [p.reference, p.branchName, p.pickupTime].map((text) => ({ type: "text" as const, text }));
+}
+
+/** Fired when staff mark a takeaway order READY_FOR_PICKUP — a physical hand-off moment reservations don't have. */
+export async function sendTakeawayOrderReadyForPickupNotification(payload: TakeawayWhatsAppPayload) {
+  const send = env.WHATSAPP_TAKEAWAY_READY_TEMPLATE_NAME
+    ? sendWhatsAppTemplate(
+        payload.phone,
+        env.WHATSAPP_TAKEAWAY_READY_TEMPLATE_NAME,
+        buildTakeawayReadyTemplateParams(payload),
+        TAKEAWAY_CATERING_TEMPLATE_LANGUAGE,
+      )
+    : sendWhatsAppMessage(payload.phone, formatTakeawayReadyForPickupMessage(payload));
+
+  await send;
+}
+
+interface CateringWhatsAppPayload {
+  branchName: string;
+  branchCode: "LUSAKA" | "KITWE";
+  packageName: string | null;
+  customerName: string;
+  phone: string;
+  eventDate: string; // YYYY-MM-DD
+  guestCount: number;
+  notes?: string | null;
+}
+
+function formatCateringEnquiryReceivedMessage(p: CateringWhatsAppPayload): string {
+  return [
+    `Thank you for your catering enquiry at ${p.branchName}!`,
+    `Package: ${p.packageName ?? "Not specified yet"}`,
+    `Event date: ${p.eventDate} · Guests: ${p.guestCount}`,
+    `Our team will call you shortly to confirm details and pricing — this isn't a paid booking yet.`,
+    AUTOMATED_DISCLAIMER,
+  ].join("\n");
+}
+
+function buildCateringEnquiryTemplateParams(p: CateringWhatsAppPayload) {
+  return [p.branchName, p.customerName, p.eventDate, String(p.guestCount)].map((text) => ({
+    type: "text" as const,
+    text,
+  }));
+}
+
+function formatCateringStaffMessage(p: CateringWhatsAppPayload): string {
+  return [
+    `New catering enquiry — ${p.branchName}`,
+    `${p.customerName} (${p.phone})`,
+    `Package: ${p.packageName ?? "Not specified"}`,
+    `Event date: ${p.eventDate} · Guests: ${p.guestCount}`,
+    p.notes ? `Notes: ${p.notes}` : null,
+    `Follow up by phone — this is an enquiry, not a paid booking.`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+// Same fix as buildTakeawayStaffNewOrderTemplateParams — Meta rejected the
+// 6-variable version, so name+phone collapse into one {{2}} here.
+function buildCateringStaffTemplateParams(p: CateringWhatsAppPayload) {
+  return [p.branchName, `${p.customerName} (${p.phone})`, p.packageName ?? "Not specified", p.eventDate, String(p.guestCount)].map(
+    (text) => ({ type: "text" as const, text }),
+  );
+}
+
+/**
+ * Fired when a catering enquiry is submitted — tells the customer we got it
+ * (this is a catalog + enquiry model, not a paid checkout, so it's an
+ * acknowledgement rather than a confirmation) and pings that branch's staff,
+ * same template-if-configured-else-free-text pattern as every other
+ * notification in this file.
+ */
+export async function sendCateringEnquiryNotifications(payload: CateringWhatsAppPayload) {
+  const customerSend = env.WHATSAPP_CATERING_ENQUIRY_TEMPLATE_NAME
+    ? sendWhatsAppTemplate(
+        payload.phone,
+        env.WHATSAPP_CATERING_ENQUIRY_TEMPLATE_NAME,
+        buildCateringEnquiryTemplateParams(payload),
+        TAKEAWAY_CATERING_TEMPLATE_LANGUAGE,
+      )
+    : sendWhatsAppMessage(payload.phone, formatCateringEnquiryReceivedMessage(payload));
+
+  const sends: Promise<void>[] = [customerSend];
+
+  const staffNumbers = staffNumbersFor(payload.branchCode);
+  if (staffNumbers.length) {
+    for (const num of staffNumbers) {
+      const staffSend = env.WHATSAPP_CATERING_STAFF_TEMPLATE_NAME
+        ? sendWhatsAppTemplate(
+            num,
+            env.WHATSAPP_CATERING_STAFF_TEMPLATE_NAME,
+            buildCateringStaffTemplateParams(payload),
+            TAKEAWAY_CATERING_TEMPLATE_LANGUAGE,
+          )
+        : sendWhatsAppMessage(num, formatCateringStaffMessage(payload));
+      sends.push(staffSend);
+    }
+  } else {
+    console.warn(`[whatsapp] No admin number configured for ${payload.branchCode} — skipped catering enquiry alert`);
+  }
+
+  await Promise.allSettled(sends);
 }
