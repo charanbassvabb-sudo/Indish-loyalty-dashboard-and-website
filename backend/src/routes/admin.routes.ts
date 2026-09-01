@@ -14,6 +14,7 @@ import {
   deleteAvailability,
 } from "../controllers/availability.controller";
 import { listContent, upsertContent } from "../controllers/content.controller";
+import { listDiscounts } from "../controllers/discount.controller";
 
 const router = Router();
 
@@ -26,6 +27,8 @@ router.get("/reservations/:id", asyncHandler(getReservation));
 router.patch("/reservations/:id", asyncHandler(updateReservation));
 
 router.get("/reports/summary", asyncHandler(getReportsSummary));
+
+router.get("/discounts", asyncHandler(listDiscounts));
 
 router.get("/availability", asyncHandler(listAvailability));
 router.put("/availability", asyncHandler(upsertAvailability));

@@ -6,7 +6,7 @@ import { PaymentAttemptDrawer } from "@/components/admin/PaymentAttemptDrawer";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useToast } from "@/context/ToastContext";
 import type { PaymentAttemptListItem, PaymentAttemptListResponse, PaymentDashboardStatus } from "@/types/admin";
-import { PAYMENT_STATUS_LABEL, PAYMENT_STATUS_STYLE } from "@/types/admin";
+import { PAYMENT_STATUS_LABEL, PAYMENT_STATUS_STYLE, paymentAttemptOrderInfo } from "@/types/admin";
 
 const PAGE_SIZE = 15;
 
@@ -89,7 +89,7 @@ export function AdminPaymentsTab({ onChanged }: { onChanged?: () => void }) {
       )}
 
       <div className="card-warm overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="hidden overflow-x-auto sm:block">
           <table className="w-full text-left text-sm">
             <thead className="sticky top-0 z-10 border-b border-border bg-card/95 text-xs uppercase tracking-wide text-muted-foreground backdrop-blur-sm">
               <tr>
@@ -121,44 +121,110 @@ export function AdminPaymentsTab({ onChanged }: { onChanged?: () => void }) {
                 </tr>
               )}
               {!loading &&
-                data?.attempts.map((a, i) => (
-                  <motion.tr
-                    key={`${a.id ?? "wait"}-${a.reservation.id}`}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: i * 0.02 }}
-                    onClick={() => setSelected(a)}
-                    whileHover={{ scale: 1.005 }}
-                    className={`relative cursor-pointer border-b border-border/60 transition-colors hover:bg-secondary/60 hover:shadow-warm ${
-                      i % 2 === 1 ? "bg-background/30" : ""
-                    }`}
-                  >
-                    <td className="px-5 py-3">
-                      <div className="font-medium text-foreground">{a.reservation.customerName}</div>
-                      <div className="text-xs text-muted-foreground">{a.reservation.phone}</div>
-                    </td>
-                    <td className="px-5 py-3 text-muted-foreground">
-                      {a.reservation.reference}
-                      <div className="text-xs">{a.reservation.branchName.replace("Indish — ", "")}</div>
-                    </td>
-                    <td className="px-5 py-3 text-muted-foreground">ZMW {a.reservation.depositAmount}</td>
-                    <td className="px-5 py-3 text-muted-foreground">
-                      {a.extracted?.amount ? `ZMW ${a.extracted.amount}` : "—"}
-                    </td>
-                    <td className="px-5 py-3 font-mono text-xs text-muted-foreground">
-                      {a.extracted?.transactionId ?? "—"}
-                    </td>
-                    <td className="px-5 py-3">
-                      <span
-                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[0.65rem] font-bold uppercase tracking-wide ${PAYMENT_STATUS_STYLE[a.paymentStatus]}`}
-                      >
-                        {PAYMENT_STATUS_LABEL[a.paymentStatus]}
-                      </span>
-                    </td>
-                  </motion.tr>
-                ))}
+                data?.attempts.map((a, i) => {
+                  const info = paymentAttemptOrderInfo(a);
+                  return (
+                    <motion.tr
+                      key={`${a.id ?? "wait"}-${info.kind}-${info.id}`}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: i * 0.02 }}
+                      onClick={() => setSelected(a)}
+                      whileHover={{ scale: 1.005 }}
+                      className={`relative cursor-pointer border-b border-border/60 transition-colors hover:bg-secondary/60 hover:shadow-warm ${
+                        i % 2 === 1 ? "bg-background/30" : ""
+                      }`}
+                    >
+                      <td className="px-5 py-3">
+                        <div className="font-medium text-foreground">{info.customerName}</div>
+                        <div className="text-xs text-muted-foreground">{info.phone}</div>
+                      </td>
+                      <td className="px-5 py-3 text-muted-foreground">
+                        {info.reference}
+                        {info.kind === "TAKEAWAY" && (
+                          <span className="ml-1.5 rounded-full bg-secondary px-1.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-wide text-secondary-foreground">
+                            Takeaway
+                          </span>
+                        )}
+                        <div className="text-xs">{info.branchName.replace("Indish — ", "")}</div>
+                      </td>
+                      <td className="px-5 py-3 text-muted-foreground">{info.amountLabel}</td>
+                      <td className="px-5 py-3 text-muted-foreground">
+                        {a.extracted?.amount ? `ZMW ${a.extracted.amount}` : "—"}
+                      </td>
+                      <td className="px-5 py-3 font-mono text-xs text-muted-foreground">
+                        {a.extracted?.transactionId ?? "—"}
+                      </td>
+                      <td className="px-5 py-3">
+                        <span
+                          className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[0.65rem] font-bold uppercase tracking-wide ${PAYMENT_STATUS_STYLE[a.paymentStatus]}`}
+                        >
+                          {PAYMENT_STATUS_LABEL[a.paymentStatus]}
+                        </span>
+                      </td>
+                    </motion.tr>
+                  );
+                })}
             </tbody>
           </table>
+        </div>
+
+        <div className="divide-y divide-border/60 sm:hidden">
+          {loading &&
+            Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="p-4">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="mt-2 h-3.5 w-40" />
+                <Skeleton className="mt-2 h-3.5 w-48" />
+              </div>
+            ))}
+          {!loading && data?.attempts.length === 0 && (
+            <p className="flex flex-col items-center gap-2 px-5 py-10 text-center text-sm text-muted-foreground">
+              <ImageOff className="h-6 w-6" />
+              No payments match these filters.
+            </p>
+          )}
+          {!loading &&
+            data?.attempts.map((a, i) => {
+              const info = paymentAttemptOrderInfo(a);
+              return (
+                <motion.button
+                  key={`${a.id ?? "wait"}-${info.kind}-${info.id}`}
+                  type="button"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: i * 0.02 }}
+                  onClick={() => setSelected(a)}
+                  className="flex w-full flex-col gap-1.5 p-4 text-left transition-colors active:bg-secondary/60"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="font-semibold text-foreground">{info.customerName}</span>
+                    <span
+                      className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-[0.65rem] font-bold uppercase tracking-wide ${PAYMENT_STATUS_STYLE[a.paymentStatus]}`}
+                    >
+                      {PAYMENT_STATUS_LABEL[a.paymentStatus]}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{info.phone}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {info.reference}
+                    {info.kind === "TAKEAWAY" && (
+                      <span className="ml-1.5 rounded-full bg-secondary px-1.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-wide text-secondary-foreground">
+                        Takeaway
+                      </span>
+                    )}
+                    {" · "}
+                    {info.branchName.replace("Indish — ", "")}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Expected {info.amountLabel} · Detected {a.extracted?.amount ? `ZMW ${a.extracted.amount}` : "—"}
+                  </p>
+                  {a.extracted?.transactionId && (
+                    <p className="font-mono text-[0.7rem] text-muted-foreground">{a.extracted.transactionId}</p>
+                  )}
+                </motion.button>
+              );
+            })}
         </div>
 
         <div className="flex items-center justify-between border-t border-border px-5 py-4 text-sm text-muted-foreground">
@@ -186,7 +252,7 @@ export function AdminPaymentsTab({ onChanged }: { onChanged?: () => void }) {
       </div>
 
       <PaymentAttemptDrawer
-        key={selected ? `${selected.id}-${selected.reservation.id}` : "none"}
+        key={selected ? `${selected.id}-${paymentAttemptOrderInfo(selected).kind}-${paymentAttemptOrderInfo(selected).id}` : "none"}
         attempt={selected}
         onClose={() => setSelected(null)}
         onActed={handleActed}

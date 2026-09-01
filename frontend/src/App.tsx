@@ -15,6 +15,8 @@ const HomePage = lazy(() => import("@/pages/HomePage"));
 const MenuPage = lazy(() => import("@/pages/MenuPage"));
 const MenuLandingPage = lazy(() => import("@/pages/MenuLandingPage"));
 const ReservePage = lazy(() => import("@/pages/ReservePage"));
+const TakeawayPage = lazy(() => import("@/pages/TakeawayPage"));
+const CateringPage = lazy(() => import("@/pages/CateringPage"));
 const LeaveReviewPage = lazy(() => import("@/pages/LeaveReviewPage"));
 const ComplaintsPage = lazy(() => import("@/pages/ComplaintsPage"));
 const PrivacyPolicyPage = lazy(() => import("@/pages/PrivacyPolicyPage"));
@@ -39,6 +41,8 @@ function PublicSite() {
           <Route path="/:branchId" element={<HomePage />} />
           <Route path="/:branchId/menu" element={<MenuPage />} />
           <Route path="/:branchId/reserve" element={<ReservePage />} />
+          <Route path="/:branchId/takeaway" element={<TakeawayPage />} />
+          <Route path="/:branchId/catering" element={<CateringPage />} />
           <Route path="/:branchId/complaints" element={<ComplaintsPage />} />
           <Route path="/:branchId/*" element={<NotFoundPage />} />
           <Route path="*" element={<NotFoundPage />} />

@@ -10,6 +10,8 @@ import logo from "@/assets/images/logo.png";
 const links = [
   { to: "", label: "Home" },
   { to: "/menu", label: "Menu" },
+  { to: "/takeaway", label: "Takeaway" },
+  { to: "/catering", label: "Catering" },
   { to: "/#reviews", label: "Reviews" },
   { to: "/#contact", label: "Contact" },
 ];

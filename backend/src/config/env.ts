@@ -42,6 +42,24 @@ const envSchema = z.object({
   // pings only actually deliver if that phone has messaged the WhatsApp
   // Business number within the last 24h. See sendPaymentUnderReviewNotifications().
   WHATSAPP_STAFF_REVIEW_TEMPLATE_NAME: z.string().optional(),
+  // Takeaway order notifications — same template-if-configured-else-free-text
+  // pattern as the reservation vars above, just namespaced separately so a
+  // takeaway template can be approved/rolled out independently of the
+  // reservation ones. See the sendTakeaway*() functions in whatsapp.service.ts.
+  WHATSAPP_TAKEAWAY_CREATED_TEMPLATE_NAME: z.string().optional(),
+  WHATSAPP_TAKEAWAY_STAFF_NEW_ORDER_TEMPLATE_NAME: z.string().optional(),
+  WHATSAPP_TAKEAWAY_UNDER_REVIEW_TEMPLATE_NAME: z.string().optional(),
+  WHATSAPP_TAKEAWAY_STAFF_REVIEW_TEMPLATE_NAME: z.string().optional(),
+  WHATSAPP_TAKEAWAY_AUTO_REJECTED_TEMPLATE_NAME: z.string().optional(),
+  WHATSAPP_TAKEAWAY_REQUEST_SCREENSHOT_TEMPLATE_NAME: z.string().optional(),
+  WHATSAPP_TAKEAWAY_CONFIRMED_TEMPLATE_NAME: z.string().optional(),
+  WHATSAPP_TAKEAWAY_REJECTED_TEMPLATE_NAME: z.string().optional(),
+  WHATSAPP_TAKEAWAY_READY_TEMPLATE_NAME: z.string().optional(),
+  // Catering enquiry notifications — unlike takeaway/reservations there's no
+  // payment flow, so only two messages exist: the customer's "we got your
+  // enquiry" confirmation and the staff alert. See sendCateringEnquiryNotifications().
+  WHATSAPP_CATERING_ENQUIRY_TEMPLATE_NAME: z.string().optional(),
+  WHATSAPP_CATERING_STAFF_TEMPLATE_NAME: z.string().optional(),
   // Per-branch admin numbers — each branch's own admin gets pinged for that
   // branch's reservations (new booking + payment-needs-review) instead of
   // everything going to one shared number. NOTIFY_PHONE_NUMBER is kept as a

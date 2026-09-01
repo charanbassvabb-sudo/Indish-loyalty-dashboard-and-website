@@ -1,7 +1,7 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { MapPin, Star, ArrowRight } from "lucide-react";
+import { MapPin, Star, ArrowRight, ShoppingBag } from "lucide-react";
 import type { Branch } from "@/types";
 import { useContentValue } from "@/context/SiteContentContext";
 import { blurPlaceholders } from "@/assets/blurPlaceholders";
@@ -115,6 +115,13 @@ export function Hero({ branch }: { branch: Branch }) {
             className="flex items-center gap-2 rounded-full border border-border bg-background/40 px-7 py-3.5 text-sm font-semibold text-foreground backdrop-blur-sm transition-colors hover:border-primary hover:text-primary"
           >
             View Menu
+          </Link>
+          <Link
+            to={`/${branch.id}/takeaway`}
+            className="flex items-center gap-2 rounded-full border border-border bg-background/40 px-7 py-3.5 text-sm font-semibold text-foreground backdrop-blur-sm transition-colors hover:border-primary hover:text-primary"
+          >
+            <ShoppingBag className="h-4 w-4" />
+            Order Takeaway
           </Link>
         </motion.div>
       </motion.div>

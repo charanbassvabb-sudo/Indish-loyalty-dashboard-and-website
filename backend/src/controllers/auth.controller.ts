@@ -16,24 +16,24 @@ const COOKIE_OPTIONS = {
 };
 
 export async function login(req: Request, res: Response) {
-  const { email, password } = adminLoginSchema.parse(req.body);
+  const { username, password } = adminLoginSchema.parse(req.body);
 
-  const admin = await prisma.admin.findUnique({ where: { email } });
+  const admin = await prisma.admin.findUnique({ where: { username } });
 
   // Compare against a dummy hash when the admin doesn't exist, so response
-  // timing doesn't reveal whether the email is registered.
+  // timing doesn't reveal whether the username is registered.
   const passwordHash = admin?.passwordHash ?? "$2a$12$invalidinvalidinvalidinvalidinvalidinvalidinvalidin.";
   const passwordMatches = await bcrypt.compare(password, passwordHash);
 
   if (!admin || !passwordMatches) {
-    throw ApiError.unauthorized("Invalid email or password");
+    throw ApiError.unauthorized("Invalid username or password");
   }
 
-  const payload: AdminTokenPayload = { adminId: admin.id, email: admin.email, role: admin.role };
+  const payload: AdminTokenPayload = { adminId: admin.id, username: admin.username, role: admin.role };
   const token = jwt.sign(payload, env.JWT_SECRET, { expiresIn: env.JWT_EXPIRES_IN as jwt.SignOptions["expiresIn"] });
 
   res.cookie(env.ADMIN_COOKIE_NAME, token, COOKIE_OPTIONS);
-  res.json({ admin: { id: admin.id, name: admin.name, email: admin.email, role: admin.role } });
+  res.json({ admin: { id: admin.id, name: admin.name, username: admin.username, role: admin.role } });
 }
 
 export async function logout(_req: Request, res: Response) {
@@ -45,7 +45,7 @@ export async function me(req: Request, res: Response) {
   if (!req.admin) throw ApiError.unauthorized();
   const admin = await prisma.admin.findUnique({ where: { id: req.admin.adminId } });
   if (!admin) throw ApiError.unauthorized();
-  res.json({ admin: { id: admin.id, name: admin.name, email: admin.email, role: admin.role } });
+  res.json({ admin: { id: admin.id, name: admin.name, username: admin.username, role: admin.role } });
 }
 
 /** Self-service password change — requires the current password, not just an active session. */

@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Lock, Mail } from "lucide-react";
+import { Lock, User } from "lucide-react";
 import { useAdminAuth, ApiRequestError } from "@/context/AdminAuthContext";
 import { useToast } from "@/context/ToastContext";
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
@@ -13,7 +13,7 @@ export default function AdminLoginPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
   useDocumentMeta({ title: "Admin Login | Indish", noindex: true });
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -23,7 +23,7 @@ export default function AdminLoginPage() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await login(email, password);
+      await login(username, password);
       navigate("/admin");
     } catch (err) {
       toast({
@@ -61,15 +61,15 @@ export default function AdminLoginPage() {
           <div className="mt-8 flex flex-col gap-4">
             <label className="flex flex-col gap-1.5">
               <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Email
+                Username
               </span>
               <div className="relative">
-                <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <User className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <input
-                  type="email"
+                  type="text"
                   required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   className="field pl-10"
                   autoComplete="username"
                 />

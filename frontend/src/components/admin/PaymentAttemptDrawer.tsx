@@ -5,7 +5,7 @@ import { api, ApiRequestError } from "@/lib/api";
 import { loyaltySearchUrl } from "@/lib/loyalty";
 import { formatReservationDate } from "@/lib/utils";
 import type { PaymentAttemptListItem } from "@/types/admin";
-import { PAYMENT_STATUS_LABEL, PAYMENT_STATUS_STYLE } from "@/types/admin";
+import { PAYMENT_STATUS_LABEL, PAYMENT_STATUS_STYLE, paymentAttemptOrderInfo } from "@/types/admin";
 import { useToast } from "@/context/ToastContext";
 
 function MatchField({ label, expected, detected, match }: { label: string; expected?: string; detected: string | null; match: boolean | null | undefined }) {
@@ -34,16 +34,17 @@ export function PaymentAttemptDrawer({
   const { toast } = useToast();
   const [notes, setNotes] = useState("");
   const [acting, setActing] = useState<"approve" | "reject" | "request_new_screenshot" | null>(null);
+  const info = attempt ? paymentAttemptOrderInfo(attempt) : null;
 
   async function act(action: "approve" | "reject" | "request_new_screenshot") {
-    if (!attempt?.id) return;
+    if (!attempt?.id || !info) return;
     setActing(action);
     try {
       await api.patch(`/admin/payment-attempts/${attempt.id}`, { action, notes: notes.trim() || undefined });
       toast({
         title:
           action === "approve" ? "Payment approved" : action === "reject" ? "Payment rejected" : "Requested a new screenshot",
-        description: attempt.reservation.reference,
+        description: info.reference,
         variant: action === "reject" ? "error" : "success",
       });
       onActed();
@@ -61,7 +62,7 @@ export function PaymentAttemptDrawer({
 
   return (
     <AnimatePresence>
-      {attempt && (
+      {attempt && info && (
         <>
           <motion.div
             initial={{ opacity: 0 }}
@@ -78,7 +79,7 @@ export function PaymentAttemptDrawer({
             className="fixed inset-y-0 right-0 z-50 w-full max-w-lg overflow-y-auto border-l border-border bg-card p-6 shadow-lift"
           >
             <div className="mb-1 flex items-center justify-between">
-              <h2 className="font-display text-2xl text-gradient-ember">{attempt.reservation.reference}</h2>
+              <h2 className="font-display text-2xl text-gradient-ember">{info.reference}</h2>
               <motion.button
                 onClick={onClose}
                 aria-label="Close"
@@ -90,7 +91,12 @@ export function PaymentAttemptDrawer({
               </motion.button>
             </div>
             <div className="mb-6 flex items-center gap-2">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">{attempt.reservation.branchName}</p>
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">{info.branchName}</p>
+              {info.kind === "TAKEAWAY" && (
+                <span className="rounded-full bg-secondary px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wide text-secondary-foreground">
+                  Takeaway
+                </span>
+              )}
               <span
                 className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[0.65rem] font-bold uppercase tracking-wide ${PAYMENT_STATUS_STYLE[attempt.paymentStatus]}`}
               >
@@ -99,15 +105,19 @@ export function PaymentAttemptDrawer({
             </div>
 
             <dl className="mb-5 space-y-1 text-sm">
-              <Row icon={User} label="Customer" value={attempt.reservation.customerName} />
-              <Row icon={Phone} label="Phone" value={attempt.reservation.phone} />
-              <Row icon={Mail} label="Email" value={attempt.reservation.email} />
-              <Row icon={Calendar} label="Date" value={`${formatReservationDate(attempt.reservation.date)} · ${attempt.reservation.time}`} />
-              <Row icon={Wallet} label="Deposit" value={`ZMW ${attempt.reservation.depositAmount}`} />
+              <Row icon={User} label="Customer" value={info.customerName} />
+              <Row icon={Phone} label="Phone" value={info.phone} />
+              {info.email && <Row icon={Mail} label="Email" value={info.email} />}
+              <Row
+                icon={Calendar}
+                label={info.kind === "TAKEAWAY" ? "Pickup" : "Date"}
+                value={info.kind === "RESERVATION" ? `${formatReservationDate(attempt.reservation!.date)} · ${attempt.reservation!.time}` : info.dateLabel}
+              />
+              <Row icon={Wallet} label={info.kind === "TAKEAWAY" ? "Total" : "Deposit"} value={info.amountLabel} />
             </dl>
 
             <a
-              href={loyaltySearchUrl(attempt.reservation.phone)}
+              href={loyaltySearchUrl(info.phone)}
               target="_blank"
               rel="noopener noreferrer"
               className="mb-6 inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:border-primary hover:bg-primary/20"
@@ -135,7 +145,7 @@ export function PaymentAttemptDrawer({
                   <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     What we found vs. what was expected
                   </p>
-                  <MatchField label="Amount" expected={`ZMW ${attempt.expectedAmount ?? attempt.reservation.depositAmount}`} detected={attempt.extracted?.amount ? `ZMW ${attempt.extracted.amount}` : null} match={attempt.matches?.amount} />
+                  <MatchField label="Amount" expected={`ZMW ${attempt.expectedAmount ?? info.amountLabel.replace("ZMW ", "")}`} detected={attempt.extracted?.amount ? `ZMW ${attempt.extracted.amount}` : null} match={attempt.matches?.amount} />
                   <MatchField label="Recipient" expected={attempt.expectedRecipient} detected={attempt.extracted?.recipient ?? null} match={attempt.matches?.recipient} />
                   <MatchField label="Sender" detected={attempt.extracted?.sender ?? null} match={undefined} />
                   <MatchField label="Status" expected="successful" detected={attempt.extracted?.status ?? null} match={attempt.matches?.status} />

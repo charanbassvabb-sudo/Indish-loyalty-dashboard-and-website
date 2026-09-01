@@ -7,12 +7,14 @@ import {
   EVENT_TYPES,
   getSlotAvailability,
   isSlotBookable,
+  isRecurringlyClosed,
+  getRecurringClosureNote,
   getRecurringClosureShortLabel,
   MAX_ADVANCE_HOURS,
 } from "@/data/reservation";
 import type { Branch, BranchId } from "@/types";
 import { api } from "@/lib/api";
-import { useToast } from "@/context/ToastContext";
+import { DateCalendarPicker } from "@/components/ui/DateCalendarPicker";
 
 interface Props {
   branch: Branch;
@@ -30,37 +32,14 @@ const minISO = new Date().toISOString().slice(0, 10);
 const maxISO = new Date(Date.now() + MAX_ADVANCE_HOURS * 60 * 60 * 1000).toISOString().slice(0, 10);
 
 export function ReservationDetailsStep({ branch, data, errors, onChange, onNext, submitting }: Props) {
-  const { toast } = useToast();
-
-  // The native `min`/`max` attributes on the date input below are meant to
-  // stop this at the source, but iOS Safari's date wheel is known to not
-  // reliably enforce them — the month/day wheels stay scrollable past the
-  // bound even though desktop and Android correctly grey it out. So a
-  // customer could pick, say, next month, and the only feedback they'd get
-  // was every time slot showing disabled with no obvious reason why. Re-clamp
-  // here as a backstop so an out-of-window date can never actually stick,
-  // with a toast explaining what happened instead of it just snapping back
-  // silently.
+  // The date picker below (DateCalendarPicker) only ever renders the 24h
+  // booking window's dates as clickable in the first place, so an
+  // out-of-window date can't be selected — no post-hoc clamp/toast needed
+  // the way the old native <input type="date"> required (iOS Safari's date
+  // wheel didn't reliably enforce min/max, letting a customer scroll past
+  // the bound and only find out from every time slot being disabled).
   useEffect(() => {
     if (!data.date) return;
-    if (data.date < minISO) {
-      onChange("date", minISO);
-      toast({
-        title: "That date has already passed",
-        description: "Showing the earliest date you can book instead.",
-        variant: "info",
-      });
-      return;
-    }
-    if (data.date > maxISO) {
-      onChange("date", maxISO);
-      toast({
-        title: "Reservations open up to 24 hours ahead",
-        description: "Showing the latest date you can book instead.",
-        variant: "info",
-      });
-      return;
-    }
     // If the chosen date changes and the previously picked time falls outside
     // the 24h booking window for that date, clear it so the user has to re-pick.
     if (data.time && !isSlotBookable(data.date, data.time, branch.id)) {
@@ -156,16 +135,22 @@ export function ReservationDetailsStep({ branch, data, errors, onChange, onNext,
           />
         </Field>
 
-        <Field label="Date" error={errors.date}>
-          <input
-            type="date"
-            min={minISO}
-            max={maxISO}
-            value={data.date}
-            onChange={(e) => onChange("date", e.target.value)}
-            className="field"
-          />
-        </Field>
+        <div className="sm:col-span-2">
+          <Field label="Date" error={errors.date}>
+            <DateCalendarPicker
+              value={data.date}
+              onChange={(date) => onChange("date", date)}
+              minDate={minISO}
+              maxDate={maxISO}
+              isDateDisabled={(date) =>
+                isRecurringlyClosed(date, branch.id)
+                  ? { disabled: true, reason: getRecurringClosureNote(branch.id) }
+                  : { disabled: false }
+              }
+              helperText={`Only dates within the next ${MAX_ADVANCE_HOURS} hours can be selected`}
+            />
+          </Field>
+        </div>
         <div className="sm:col-span-2">
           <AvailabilityNote branchId={branch.id} date={data.date} />
         </div>

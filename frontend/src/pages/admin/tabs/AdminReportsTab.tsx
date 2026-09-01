@@ -1,7 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { CalendarDays, Users, TrendingUp, PartyPopper, TrendingDown, Minus } from "lucide-react";
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import {
+  CalendarDays,
+  Users,
+  TrendingUp,
+  PartyPopper,
+  TrendingDown,
+  Minus,
+  ShoppingBag,
+  Wallet,
+  UtensilsCrossed,
+  Tag,
+} from "lucide-react";
 import { api } from "@/lib/api";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { AnimatedCounter } from "@/components/ui/AnimatedCounter";
@@ -21,6 +32,19 @@ const BRANCHES = [
   { label: "Kitwe", value: "KITWE" },
 ] as const;
 
+const ORDER_TYPES = [
+  { label: "All orders", value: "" },
+  { label: "Reservations", value: "RESERVATION" },
+  { label: "Takeaway", value: "TAKEAWAY" },
+  { label: "Catering", value: "CATERING" },
+] as const;
+
+const PAYMENT_METHODS = [
+  { label: "All methods", value: "" },
+  { label: "Airtel Money", value: "AIRTEL_MONEY" },
+  { label: "MTN MoMo", value: "MTN_MOMO" },
+] as const;
+
 const cardDefs = [
   { key: "todaysReservations", label: "Today's reservations", icon: CalendarDays },
   { key: "todaysCovers", label: "Today's covers", icon: Users },
@@ -28,23 +52,34 @@ const cardDefs = [
   { key: "partyBookings", label: "Party / family bookings", icon: PartyPopper },
 ] as const;
 
+const takeawayCardDefs = [
+  { key: "totalTakeawayOrders", label: "Takeaway orders", icon: ShoppingBag },
+  { key: "totalTakeawayRevenue", label: "Takeaway revenue (ZMW)", icon: Wallet },
+  { key: "totalCateringEnquiries", label: "Catering enquiries", icon: UtensilsCrossed },
+  { key: "totalDiscountsApplied", label: "Discounts applied", icon: Tag },
+] as const;
+
 export function AdminReportsTab() {
   const { toast } = useToast();
   const [branch, setBranch] = useState<"" | "LUSAKA" | "KITWE">("");
   const [days, setDays] = useState(30);
+  const [orderType, setOrderType] = useState<"" | "RESERVATION" | "TAKEAWAY" | "CATERING">("");
+  const [paymentMethod, setPaymentMethod] = useState<"" | "AIRTEL_MONEY" | "MTN_MOMO">("");
   const [data, setData] = useState<ReportsSummary | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const params = new URLSearchParams({ days: String(days) });
     if (branch) params.set("branch", branch);
+    if (orderType) params.set("orderType", orderType);
+    if (paymentMethod) params.set("paymentMethod", paymentMethod);
     setLoading(true);
     api
       .get<ReportsSummary>(`/admin/reports/summary?${params}`)
       .then(setData)
       .catch(() => toast({ title: "Couldn't load reports", description: "Please try again.", variant: "error" }))
       .finally(() => setLoading(false));
-  }, [branch, days, toast]);
+  }, [branch, days, orderType, paymentMethod, toast]);
 
   // Honest trend read on the actual series returned — first half of the
   // range vs the second half — rather than fabricating a comparison.
@@ -65,6 +100,8 @@ export function AdminReportsTab() {
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <PillSelect value={branch} onChange={setBranch} options={BRANCHES} groupId="admin-branch-pill" />
         <PillSelect value={days} onChange={setDays} options={RANGES} groupId="admin-range-pill" />
+        <PillSelect value={orderType} onChange={setOrderType} options={ORDER_TYPES} groupId="admin-ordertype-pill" />
+        <PillSelect value={paymentMethod} onChange={setPaymentMethod} options={PAYMENT_METHODS} groupId="admin-paymentmethod-pill" />
       </div>
 
       <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -161,21 +198,135 @@ export function AdminReportsTab() {
           <StatLine label="No-shows" value={data.totals.noShow} tone="muted" />
         </div>
       )}
+
+      <div className="mb-6 mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {loading || !data
+          ? takeawayCardDefs.map((c) => (
+              <div key={c.key} className="card-warm p-5">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <c.icon className="h-4 w-4 text-primary" />
+                  <span className="text-xs font-semibold uppercase tracking-wide">{c.label}</span>
+                </div>
+                <Skeleton className="mt-3 h-8 w-16" />
+              </div>
+            ))
+          : takeawayCardDefs.map((c, i) => <StatCard key={c.key} def={c} value={data.totals[c.key]} index={i} />)}
+      </div>
+
+      <div className="card-warm p-6">
+        <h3 className="mb-4 font-display text-xl text-foreground">Takeaway orders &amp; revenue per day</h3>
+        <div className="h-64 w-full">
+          {loading ? (
+            <div className="flex h-full flex-col justify-end gap-2 px-2 pb-2">
+              <div className="flex h-full items-end gap-2">
+                {Array.from({ length: 12 }).map((_, i) => (
+                  <Skeleton key={i} className="flex-1" style={{ height: `${25 + ((i * 31) % 55)}%` }} />
+                ))}
+              </div>
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={data?.takeawaySeries ?? []} margin={{ left: -20, right: 12, top: 10 }}>
+                <defs>
+                  <linearGradient id="takeawayFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="oklch(0.78 0.12 85)" stopOpacity={0.55} />
+                    <stop offset="100%" stopColor="oklch(0.78 0.12 85)" stopOpacity={0.02} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.31 0.028 264)" vertical={false} />
+                <XAxis
+                  dataKey="date"
+                  tick={{ fill: "oklch(0.68 0.025 260)", fontSize: 11 }}
+                  tickFormatter={(v) => v.slice(5)}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis tick={{ fill: "oklch(0.68 0.025 260)", fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false} />
+                <Tooltip content={<TakeawayTooltip />} />
+                <Area
+                  type="monotone"
+                  dataKey="orders"
+                  stroke="oklch(0.78 0.12 85)"
+                  strokeWidth={2.5}
+                  fill="url(#takeawayFill)"
+                  name="Orders"
+                  activeDot={{ r: 5, stroke: "oklch(0.78 0.12 85)", strokeWidth: 2, fill: "oklch(0.62 0.19 264)" }}
+                  animationDuration={900}
+                  animationEasing="ease-out"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+      </div>
+
+      {data && (
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          <div className="card-warm p-6">
+            <h3 className="mb-4 font-display text-lg text-foreground">Orders by branch</h3>
+            <div className="h-48 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={[
+                    { branch: "Lusaka", orders: data.totals.ordersByBranch.LUSAKA },
+                    { branch: "Kitwe", orders: data.totals.ordersByBranch.KITWE },
+                  ]}
+                  margin={{ left: -20, right: 12, top: 10 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.31 0.028 264)" vertical={false} />
+                  <XAxis dataKey="branch" tick={{ fill: "oklch(0.68 0.025 260)", fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: "oklch(0.68 0.025 260)", fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false} />
+                  <Tooltip content={<ChartTooltip suffix=" orders" />} />
+                  <Bar dataKey="orders" fill="oklch(0.62 0.19 264)" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+          <div className="card-warm p-6">
+            <h3 className="mb-4 font-display text-lg text-foreground">Takeaway revenue by payment method</h3>
+            <div className="h-48 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={[
+                    { method: "Airtel Money", revenue: data.totals.revenueByPaymentMethod.AIRTEL_MONEY },
+                    { method: "MTN MoMo", revenue: data.totals.revenueByPaymentMethod.MTN_MOMO },
+                  ]}
+                  margin={{ left: -20, right: 12, top: 10 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.31 0.028 264)" vertical={false} />
+                  <XAxis dataKey="method" tick={{ fill: "oklch(0.68 0.025 260)", fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: "oklch(0.68 0.025 260)", fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false} />
+                  <Tooltip content={<ChartTooltip prefix="ZMW " />} />
+                  <Bar dataKey="revenue" fill="oklch(0.78 0.12 85)" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {data && (
+        <div className="mt-6">
+          <StatLine label="Total discount amount given (ZMW)" value={data.totals.totalDiscountAmount} tone="default" />
+        </div>
+      )}
     </div>
   );
 }
+
+const DECIMAL_STAT_KEYS = new Set(["averagePartySize", "totalTakeawayRevenue", "totalDiscountAmount"]);
 
 function StatCard({
   def,
   value,
   index,
 }: {
-  def: (typeof cardDefs)[number];
+  def: { key: string; label: string; icon: typeof CalendarDays };
   value: number;
   index: number;
 }) {
   const tilt = useTiltSpotlight<HTMLDivElement>({ max: 5 });
-  const decimals = def.key === "averagePartySize" ? 1 : 0;
+  const decimals = DECIMAL_STAT_KEYS.has(def.key) ? (def.key === "averagePartySize" ? 1 : 2) : 0;
 
   return (
     <motion.div
@@ -215,12 +366,38 @@ function StatLine({ label, value, tone }: { label: string; value: number; tone: 
   );
 }
 
-function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: { value: number }[]; label?: string }) {
+function ChartTooltip({
+  active,
+  payload,
+  label,
+  prefix = "",
+  suffix = " reservations",
+}: {
+  active?: boolean;
+  payload?: { value: number }[];
+  label?: string;
+  prefix?: string;
+  suffix?: string;
+}) {
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded-xl border border-border bg-popover px-3 py-2 text-xs shadow-lift">
       <p className="font-semibold text-foreground">{label}</p>
-      <p className="mt-0.5 text-primary">{payload[0].value} reservations</p>
+      <p className="mt-0.5 text-primary">
+        {prefix}
+        {payload[0].value}
+        {suffix}
+      </p>
+    </div>
+  );
+}
+
+function TakeawayTooltip({ active, payload, label }: { active?: boolean; payload?: { value: number }[]; label?: string }) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="rounded-xl border border-border bg-popover px-3 py-2 text-xs shadow-lift">
+      <p className="font-semibold text-foreground">{label}</p>
+      <p className="mt-0.5 text-primary">{payload[0].value} orders</p>
     </div>
   );
 }

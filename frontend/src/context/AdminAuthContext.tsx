@@ -4,14 +4,14 @@ import { api, ApiRequestError } from "@/lib/api";
 export interface AdminUser {
   id: number;
   name: string;
-  email: string;
+  username: string;
   role: "OWNER" | "MANAGER" | "STAFF";
 }
 
 interface AdminAuthValue {
   admin: AdminUser | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -29,8 +29,8 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
       .finally(() => setLoading(false));
   }, []);
 
-  async function login(email: string, password: string) {
-    const res = await api.post<{ admin: AdminUser }>("/admin/auth/login", { email, password });
+  async function login(username: string, password: string) {
+    const res = await api.post<{ admin: AdminUser }>("/admin/auth/login", { username, password });
     setAdmin(res.admin);
   }
 

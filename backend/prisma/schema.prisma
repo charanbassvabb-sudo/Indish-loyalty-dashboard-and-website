@@ -68,6 +68,45 @@ enum BookingType {
   PARTY
 }
 
+enum SpiceLevel {
+  MILD
+  MEDIUM
+  HOT
+}
+
+// Mirrors ReservationStatus (PENDING_PAYMENT/CONFIRMED/CANCELLED/COMPLETED/
+// NO_SHOW carry over identically) plus two kitchen-side states a table
+// booking never needs — a takeaway order has a physical hand-off moment a
+// reservation doesn't.
+enum TakeawayOrderStatus {
+  PENDING_PAYMENT
+  CONFIRMED
+  PREPARING
+  READY_FOR_PICKUP
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum DiscountType {
+  FIXED // flat ZMW amount off
+  PERCENTAGE // 0-100
+}
+
+enum CateringPackageTier {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+}
+
+enum CateringEnquiryStatus {
+  NEW
+  CONTACTED
+  BOOKED
+  DECLINED
+}
+
 // Menu categories are a small, fixed-ish set (tabs on the public menu page),
 // managed by seed data today — only items within them are admin-editable via
 // the dashboard. slug is stable across renames (used for the public tab
@@ -96,22 +135,22 @@ model MenuItem {
   category   MenuCategory @relation(fields: [categoryId], references: [id])
   branchCode BranchCode?
 
-  name        String
-  description String  @db.Text
+  name          String
+  description   String  @db.Text
   // The "base" price — what's shown when an item only has one price. For
   // items that print with more than one price on the physical menu (e.g.
   // "Veg. - K200 | Chicken - K250", "Half - K200 / Full - K350",
   // "Dry - K100 / Gravy - K150"), this is always the first/primary one and
   // priceVariants (below) carries the rest, so a plain `price` read never
   // breaks for callers that don't care about variants.
-  price       Decimal @db.Decimal(10, 2)
+  price         Decimal @db.Decimal(10, 2)
   // What `price` above is for, e.g. "Veg", "Half", "Dry" — only meaningful
   // (and only ever set) alongside priceVariants; null for single-price items.
-  priceLabel  String?
-  veg         Boolean @default(false)
+  priceLabel    String?
+  veg           Boolean @default(false)
   // Subset of the frontend's MenuBadge union (validated in the Zod schema,
   // not the DB — MySQL has no native string-array column via Prisma).
-  badges      Json?
+  badges        Json?
   // Extra priced variants beyond the base `price` above, as
   // [{ label: "Chicken", price: 250 }, ...] — null/empty when the item only
   // has one price. Kept as JSON rather than separate rows because these are
@@ -123,11 +162,13 @@ model MenuItem {
   // /api/uploads/menu-images/<imagePath> (see menu.routes.ts / app.ts).
   // Unlike payment screenshots this is meant to be public, so it's a plain
   // static file, not streamed through an authenticated route.
-  imagePath   String?
-  sortOrder   Int     @default(0)
+  imagePath     String?
+  sortOrder     Int     @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  takeawayOrderItems TakeawayOrderItem[]
 
   @@index([categoryId])
   @@index([branchCode])
@@ -145,8 +186,10 @@ model Branch {
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
 
-  reservations Reservation[]
-  availability DailyAvailability[]
+  reservations      Reservation[]
+  availability      DailyAvailability[]
+  takeawayOrders    TakeawayOrder[]
+  cateringEnquiries CateringEnquiry[]
 
   @@map("branches")
 }
@@ -154,13 +197,16 @@ model Branch {
 model Admin {
   id           Int       @id @default(autoincrement())
   name         String
-  email        String    @unique
+  // Plain username, not an email address — client-confirmed: staff sign in
+  // with a short shared name (e.g. "admin"), not a personal email.
+  username     String    @unique
   passwordHash String
   role         AdminRole @default(STAFF)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
   reviewedPayments PaymentAttempt[]
+  appliedDiscounts Discount[]
 
   @@map("admins")
 }
@@ -197,6 +243,187 @@ model Reservation {
   @@map("reservations")
 }
 
+// A takeaway order — pickup only, no delivery. Unlike Reservation's
+// per-guest deposit, the full item-total (minus any admin-applied discount,
+// see Discount) is due upfront via mobile money before the kitchen starts
+// preparing it, verified through the same PaymentAttempt/OCR flow as a
+// reservation deposit.
+model TakeawayOrder {
+  id        Int    @id @default(autoincrement())
+  reference String @unique // e.g. IND-LU-TA-A3F9C
+  branchId  Int
+  branch    Branch @relation(fields: [branchId], references: [id])
+
+  customerName String
+  phone        String
+  email        String?
+  notes        String? @db.Text
+
+  pickupDate DateTime @db.Date
+  pickupTime String // wall-clock "HH:MM", same convention as Reservation.time
+
+  // subtotalAmount is the server-computed sum of all line totals, before any
+  // discount. totalAmount is what's actually due/paid (subtotal minus the
+  // linked Discount, if any) — kept denormalized so payment verification and
+  // reports never need to join through Discount just to know the amount.
+  subtotalAmount Decimal @db.Decimal(10, 2)
+  totalAmount    Decimal @db.Decimal(10, 2)
+
+  status TakeawayOrderStatus @default(PENDING_PAYMENT)
+
+  // At most one discount per order — staff-applied only, never a
+  // customer-facing promo code (see Discount below).
+  discountId Int?      @unique
+  discount   Discount? @relation(fields: [discountId], references: [id])
+
+  items           TakeawayOrderItem[]
+  paymentAttempts PaymentAttempt[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([branchId, status])
+  @@index([status])
+  @@index([pickupDate])
+  @@map("takeaway_orders")
+}
+
+// One row per basket line. name/price are snapshotted at order time (same
+// principle as PaymentAttempt.expectedAmount) so a later menu edit/delete
+// never silently changes what a customer already ordered and paid for.
+model TakeawayOrderItem {
+  id      Int           @id @default(autoincrement())
+  orderId Int
+  order   TakeawayOrder @relation(fields: [orderId], references: [id])
+
+  menuItemId Int?
+  menuItem   MenuItem? @relation(fields: [menuItemId], references: [id], onDelete: SetNull)
+
+  nameSnapshot      String
+  priceVariantLabel String?
+  unitPrice         Decimal     @db.Decimal(10, 2)
+  quantity          Int
+  // Nullable — not every dish (drinks, desserts) has a meaningful spice
+  // choice, so this is asked/shown per item rather than forced on everything.
+  spiceLevel        SpiceLevel?
+  lineTotal         Decimal     @db.Decimal(10, 2)
+
+  @@index([orderId])
+  @@map("takeaway_order_items")
+}
+
+// Staff-applied only — never a customer-facing promo code anywhere in the
+// takeaway checkout. One discount per order (1:1 via TakeawayOrder.discountId
+// above), applied while the order is still PENDING_PAYMENT so the OCR
+// verification step checks the screenshot against the already-discounted
+// total. original/discount/finalAmount are snapshotted at apply time (same
+// snapshot-at-creation principle as TakeawayOrderItem) so this row stays an
+// accurate audit record even if the order total is later touched again.
+model Discount {
+  id     Int          @id @default(autoincrement())
+  type   DiscountType
+  // ZMW for FIXED, 0-100 for PERCENTAGE — the raw value the admin entered.
+  value  Decimal      @db.Decimal(10, 2)
+  reason String?
+
+  originalAmount Decimal @db.Decimal(10, 2)
+  discountAmount Decimal @db.Decimal(10, 2)
+  finalAmount    Decimal @db.Decimal(10, 2)
+
+  appliedByAdminId Int
+  appliedByAdmin   Admin @relation(fields: [appliedByAdminId], references: [id])
+
+  takeawayOrder TakeawayOrder?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("discounts")
+}
+
+// Catering is a catalog + enquiry model, NOT a paid checkout — client-
+// confirmed scope. Customers browse packages/categories/items on the public
+// site and submit an enquiry (contact details + event date/guest count);
+// staff follow up by phone. No basket, no OCR, no PaymentAttempt involved
+// anywhere in this part of the schema.
+model CateringPackage {
+  id          Int                 @id @default(autoincrement())
+  tier        CateringPackageTier @unique
+  name        String
+  description String?             @db.Text
+  // Free text, e.g. "From ZMW 150/head" — the spec never fixes a pricing
+  // model for packages, so this stays a display string rather than a
+  // structured price the admin would have to keep rigidly accurate.
+  priceNote   String?
+  active      Boolean             @default(true)
+  sortOrder   Int                 @default(0)
+
+  categories CateringCategory[]
+  enquiries  CateringEnquiry[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("catering_packages")
+}
+
+// Starters / Main Course / Dal / Rice / Roti / Additional Items — the
+// subcategory structure is admin-defined per package (not hardcoded), since
+// only Silver/Gold/Platinum get "Additional Items" per the spec.
+model CateringCategory {
+  id        Int             @id @default(autoincrement())
+  packageId Int
+  package   CateringPackage @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  name      String
+  sortOrder Int             @default(0)
+
+  items CateringItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([packageId, name])
+  @@map("catering_categories")
+}
+
+model CateringItem {
+  id         Int              @id @default(autoincrement())
+  categoryId Int
+  category   CateringCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  name       String
+  // Descriptive, not a priced line — e.g. "2 pcs per guest", "1 bowl per table".
+  quantity   String
+  sortOrder  Int              @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("catering_items")
+}
+
+model CateringEnquiry {
+  id        Int              @id @default(autoincrement())
+  branchId  Int
+  branch    Branch           @relation(fields: [branchId], references: [id])
+  packageId Int?
+  package   CateringPackage? @relation(fields: [packageId], references: [id], onDelete: SetNull)
+
+  customerName String
+  phone        String
+  eventDate    DateTime @db.Date
+  guestCount   Int
+  notes        String?  @db.Text
+
+  status CateringEnquiryStatus @default(NEW)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([branchId, status])
+  @@index([status])
+  @@map("catering_enquiries")
+}
+
 // One row per branch/date. Lets staff manually flag a day as fully booked,
 // or publish how many seats are left, without touching the reservation rows.
 model DailyAvailability {
@@ -230,17 +457,26 @@ model SiteContent {
   @@map("site_content")
 }
 
-// One row per screenshot a customer uploads for a reservation. A booking can
-// have several — a first attempt that failed OCR, then a retry that
-// verified — so the history of what was tried is never lost. Exactly one
-// attempt per reservation should ever reach AUTO_VERIFIED or APPROVED; that's
-// the one that actually confirmed the table (enforced in application code,
-// not the schema, since "at most one of several rows" isn't a constraint
-// SQL/Prisma can express directly).
+// One row per screenshot a customer uploads for a reservation deposit OR a
+// takeaway order — exactly one of reservationId/takeawayOrderId is set per
+// row (enforced in application code at every write site, not the schema:
+// MySQL CHECK constraints are only reliably enforced on 8.0.16+, so this is
+// not relied on as the primary guard). Sharing this table rather than
+// forking a second one keeps the cross-order duplicate-transaction-ID check
+// below (usedTransactionIds in payment.controller.ts) working across BOTH
+// order types — reusing one screenshot to "pay" for two different orders is
+// still caught either way. A parent can have several attempts — a first try
+// that failed OCR, then a retry that verified — so the history is never
+// lost. Exactly one attempt per parent should ever reach AUTO_VERIFIED or
+// APPROVED; that's the one that actually confirmed it (enforced in
+// application code, not the schema, since "at most one of several rows"
+// isn't a constraint SQL/Prisma can express directly).
 model PaymentAttempt {
-  id            Int         @id @default(autoincrement())
-  reservationId Int
-  reservation   Reservation @relation(fields: [reservationId], references: [id])
+  id              Int            @id @default(autoincrement())
+  reservationId   Int?
+  reservation     Reservation?   @relation(fields: [reservationId], references: [id])
+  takeawayOrderId Int?
+  takeawayOrder   TakeawayOrder? @relation(fields: [takeawayOrderId], references: [id])
 
   // What we told the customer to pay/send to, captured at upload time so a
   // later change to business numbers doesn't retroactively change what an
@@ -293,6 +529,7 @@ model PaymentAttempt {
 
   @@index([extractedTransactionId])
   @@index([reservationId])
+  @@index([takeawayOrderId])
   @@index([status])
   @@map("payment_attempts")
 }

@@ -1,7 +1,10 @@
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { X, Leaf } from "lucide-react";
+import { X, Leaf, Minus, Plus } from "lucide-react";
 import type { MenuItem } from "@/types";
 import { BlurImage } from "@/components/ui/BlurImage";
+import { SpiceLevelPicker } from "@/components/takeaway/SpiceLevelPicker";
+import type { SpiceLevel } from "@/data/takeaway";
 
 const badgeStyles: Record<string, string> = {
   Signature: "bg-gradient-ember text-primary-foreground",
@@ -9,7 +12,61 @@ const badgeStyles: Record<string, string> = {
   "Most Ordered": "bg-accent text-accent-foreground",
 };
 
-export function MenuItemModal({ item, onClose }: { item: MenuItem | null; onClose: () => void }) {
+export interface AddToBasketPayload {
+  item: MenuItem;
+  priceVariantLabel: string | null;
+  unitPrice: number;
+  quantity: number;
+  spiceLevel: SpiceLevel | null;
+}
+
+/**
+ * `onAddToBasket` is optional — passed by both the takeaway flow
+ * (TakeawayBrowseMenuStep) and the public menu (MenuPage), so a customer can
+ * add a dish to their takeaway basket from wherever they're browsing it.
+ * When absent (e.g. an admin preview context), this renders read-only,
+ * exactly as it did before basket support existed.
+ */
+export function MenuItemModal({
+  item,
+  onClose,
+  onAddToBasket,
+}: {
+  item: MenuItem | null;
+  onClose: () => void;
+  onAddToBasket?: (payload: AddToBasketPayload) => void;
+}) {
+  const [variantIndex, setVariantIndex] = useState(0);
+  const [quantity, setQuantity] = useState(1);
+  const [spiceLevel, setSpiceLevel] = useState<SpiceLevel | null>(null);
+
+  // Reset the basket-picker state whenever a different item opens (or the
+  // modal closes and reopens for the same one) — otherwise a variant/spice
+  // choice from a previous item could silently carry over.
+  useEffect(() => {
+    setVariantIndex(0);
+    setQuantity(1);
+    setSpiceLevel(null);
+  }, [item?.id]);
+
+  const variants = item?.priceVariants?.length
+    ? [{ label: item.priceLabel ?? "", price: item.price }, ...item.priceVariants]
+    : null;
+  const selectedVariant = variants?.[variantIndex];
+  const unitPrice = selectedVariant ? selectedVariant.price : (item?.price ?? 0);
+
+  function handleAdd() {
+    if (!item || !onAddToBasket) return;
+    onAddToBasket({
+      item,
+      priceVariantLabel: selectedVariant?.label || null,
+      unitPrice,
+      quantity,
+      spiceLevel,
+    });
+    onClose();
+  }
+
   return (
     <AnimatePresence>
       {item && (
@@ -95,6 +152,65 @@ export function MenuItemModal({ item, onClose }: { item: MenuItem | null; onClos
               <div className="mt-6 flex items-center justify-between border-t border-border pt-5">
                 <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Price</span>
                 <span className="font-display text-2xl text-primary">ZMW {item.price}</span>
+              </div>
+            )}
+
+            {onAddToBasket && (
+              <div className="mt-6 flex flex-col gap-4 border-t border-border pt-5">
+                {variants && variants.length > 1 && (
+                  <div>
+                    <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      Choose an option
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {variants.map((v, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => setVariantIndex(i)}
+                          className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                            i === variantIndex
+                              ? "border-primary bg-secondary text-primary"
+                              : "border-border text-muted-foreground hover:border-primary/50"
+                          }`}
+                        >
+                          {v.label || "Standard"} · ZMW {v.price}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <SpiceLevelPicker value={spiceLevel} onChange={setSpiceLevel} optional />
+
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 rounded-full border border-border px-2 py-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                      aria-label="Decrease quantity"
+                      className="rounded-full p-1.5 text-muted-foreground hover:text-primary"
+                    >
+                      <Minus className="h-3.5 w-3.5" />
+                    </button>
+                    <span className="w-5 text-center text-sm font-semibold text-foreground">{quantity}</span>
+                    <button
+                      type="button"
+                      onClick={() => setQuantity((q) => Math.min(20, q + 1))}
+                      aria-label="Increase quantity"
+                      className="rounded-full p-1.5 text-muted-foreground hover:text-primary"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleAdd}
+                    className="btn-shine bg-gradient-ember shadow-warm flex-1 rounded-full px-6 py-3 text-sm font-semibold text-primary-foreground transition-transform hover:scale-105"
+                  >
+                    Add to Basket · ZMW {unitPrice * quantity}
+                  </button>
+                </div>
               </div>
             )}
           </motion.div>

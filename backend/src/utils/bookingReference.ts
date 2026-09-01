@@ -21,6 +21,11 @@ export function generateBookingReference(branch: "LUSAKA" | "KITWE"): string {
   return `IND-${BRANCH_PREFIX[branch]}-${randomSuffix()}`;
 }
 
+/** Generates a takeaway order reference like IND-LU-TA-A3F9C or IND-KI-TA-7QZXM. */
+export function generateTakeawayReference(branch: "LUSAKA" | "KITWE"): string {
+  return `IND-${BRANCH_PREFIX[branch]}-TA-${randomSuffix()}`;
+}
+
 /**
  * Generates our own internal payment reference, e.g. PAY-2026-83921 — ties a
  * payment attempt back to a booking in OUR system. The customer never enters

@@ -5,7 +5,7 @@ import { ApiError } from "../utils/ApiError";
 
 export interface AdminTokenPayload {
   adminId: number;
-  email: string;
+  username: string;
   role: "OWNER" | "MANAGER" | "STAFF";
 }
 
