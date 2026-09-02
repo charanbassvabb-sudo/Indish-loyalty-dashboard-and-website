@@ -15,6 +15,7 @@ import {
 } from "../controllers/availability.controller";
 import { listContent, upsertContent } from "../controllers/content.controller";
 import { listDiscounts } from "../controllers/discount.controller";
+import { getAdminStatus } from "../controllers/status.controller";
 
 const router = Router();
 
@@ -36,5 +37,7 @@ router.delete("/availability/:id", asyncHandler(deleteAvailability));
 
 router.get("/content", asyncHandler(listContent));
 router.put("/content", asyncHandler(upsertContent));
+
+router.get("/status", asyncHandler(getAdminStatus));
 
 export default router;

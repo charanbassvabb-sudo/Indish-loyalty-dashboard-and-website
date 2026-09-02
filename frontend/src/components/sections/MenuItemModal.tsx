@@ -106,6 +106,7 @@ export function MenuItemModal({
                 src={item.imageUrl}
                 alt={item.name}
                 className="-mx-8 -mt-8 mb-5 aspect-[16/10] w-[calc(100%+4rem)]"
+                protectContent
               />
             )}
 

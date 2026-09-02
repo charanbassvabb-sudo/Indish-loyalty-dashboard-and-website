@@ -9,7 +9,13 @@
 //     repeat visits are instant and still pick up updates in the background.
 //   - /api/* and cross-origin requests are never intercepted — reservation
 //     data must always be live.
-const CACHE_NAME = "indish-cache-v1";
+// Bumped v1 -> v2 once (2026-09-02) specifically to force-evict every
+// previously cached JS/CSS/navigation entry for visitors already carrying a
+// v1 cache from before nginx started sending Cache-Control on index.html —
+// the activate handler below deletes any cache not matching this name. Bump
+// again only if a similar mass-staleness problem shows up; a normal deploy
+// doesn't need it (asset URLs are already content-hashed).
+const CACHE_NAME = "indish-cache-v2";
 const APP_SHELL = ["/", "/manifest.webmanifest", "/favicon.svg"];
 
 self.addEventListener("install", (event) => {

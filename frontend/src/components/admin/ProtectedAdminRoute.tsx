@@ -1,9 +1,10 @@
 import type { ReactNode } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useAdminAuth } from "@/context/AdminAuthContext";
 
 export function ProtectedAdminRoute({ children }: { children: ReactNode }) {
   const { admin, loading } = useAdminAuth();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -13,7 +14,10 @@ export function ProtectedAdminRoute({ children }: { children: ReactNode }) {
     );
   }
 
-  if (!admin) return <Navigate to="/admin/login" replace />;
+  // Carries the page someone actually tried to reach (e.g. a bookmarked
+  // /admin/status) through the login redirect — AdminLoginPage reads this
+  // back out to send them there instead of always landing on /admin.
+  if (!admin) return <Navigate to="/admin/login" state={{ from: location }} replace />;
 
   return <>{children}</>;
 }

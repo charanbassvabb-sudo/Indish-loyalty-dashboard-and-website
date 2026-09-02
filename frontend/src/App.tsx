@@ -23,6 +23,7 @@ const PrivacyPolicyPage = lazy(() => import("@/pages/PrivacyPolicyPage"));
 const NotFoundPage = lazy(() => import("@/pages/NotFoundPage"));
 const AdminLoginPage = lazy(() => import("@/pages/admin/AdminLoginPage"));
 const AdminDashboardPage = lazy(() => import("@/pages/admin/AdminDashboardPage"));
+const AdminStatusPage = lazy(() => import("@/pages/admin/AdminStatusPage"));
 
 function PublicSite() {
   return (
@@ -63,6 +64,14 @@ function AdminArea() {
             element={
               <ProtectedAdminRoute>
                 <AdminDashboardPage />
+              </ProtectedAdminRoute>
+            }
+          />
+          <Route
+            path="status"
+            element={
+              <ProtectedAdminRoute>
+                <AdminStatusPage />
               </ProtectedAdminRoute>
             }
           />
