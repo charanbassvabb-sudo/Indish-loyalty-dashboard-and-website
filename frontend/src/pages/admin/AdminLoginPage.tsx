@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useLocation, useNavigate, type Location } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Lock, User } from "lucide-react";
 import { useAdminAuth, ApiRequestError } from "@/context/AdminAuthContext";
@@ -11,20 +11,27 @@ import logo from "@/assets/images/logo.png";
 export default function AdminLoginPage() {
   const { admin, loading, login } = useAdminAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   useDocumentMeta({ title: "Admin Login | Indish", noindex: true });
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  if (!loading && admin) return <Navigate to="/admin" replace />;
+  // ProtectedAdminRoute stashes the page someone actually tried to reach
+  // (e.g. a bookmarked /admin/status) here before bouncing to this login
+  // page — send them back there instead of always landing on /admin.
+  const from = (location.state as { from?: Location } | null)?.from;
+  const destination = from ? `${from.pathname}${from.search}` : "/admin";
+
+  if (!loading && admin) return <Navigate to={destination} replace />;
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setSubmitting(true);
     try {
       await login(username, password);
-      navigate("/admin");
+      navigate(destination);
     } catch (err) {
       toast({
         title: "Sign in failed",
