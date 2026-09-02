@@ -8,6 +8,7 @@ import { prisma } from "../lib/prisma";
 const UPTIME_STATE_PATH = "/var/www/indish/uptime-state.json";
 const DEPLOY_LOG_PATH = "/var/www/indish/deploy-log.jsonl";
 const ERROR_LOG_PATH = "/var/log/indish/api-error.log";
+const OUT_LOG_PATH = "/var/log/indish/api-out.log";
 
 interface UptimeState {
   consecutiveFailures: number;
@@ -87,6 +88,75 @@ function summarizeRecentErrors(): { summary: string; count: number; lastSeen: st
     .slice(0, 10);
 }
 
+interface WhatsAppEvent {
+  time: string;
+  to: string;
+  kind: "text" | "template";
+  status: "sent" | "failed";
+  detail?: string;
+}
+
+/**
+ * every WhatsApp send in whatsapp.service.ts logs one line, success via
+ * console.log ("Queued to X" / "Template queued to X" -> api-out.log) or
+ * failure via console.error ("Failed to send to X: ..." / "Template send
+ * failed for X: ..." -> api-error.log). This reads both, in the last 24h,
+ * and turns them into one merged, newest-first timeline — "did the
+ * confirmation actually reach the customer" is exactly what a restaurant
+ * owner wants to sanity-check, and this was previously only visible by
+ * SSHing in and grepping two separate log files.
+ */
+function summarizeWhatsAppActivity(): { totalSent: number; totalFailed: number; events: WhatsAppEvent[] } {
+  const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+  const events: WhatsAppEvent[] = [];
+
+  function scan(path: string, status: "sent" | "failed") {
+    let raw: string;
+    try {
+      raw = readFileSync(path, "utf8");
+    } catch {
+      return;
+    }
+    for (const line of raw.split("\n")) {
+      const tsMatch = line.match(/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})/);
+      if (!tsMatch) continue;
+      const time = tsMatch[1] + "Z";
+      if (new Date(time).getTime() < cutoff) continue;
+
+      const idx = line.indexOf("[whatsapp]");
+      if (idx === -1) continue;
+      const rest = line.slice(idx + "[whatsapp]".length).trim();
+
+      const isSent = /queued to/i.test(rest);
+      const isFailed = /failed/i.test(rest);
+      if (status === "sent" && !isSent) continue;
+      if (status === "failed" && !isFailed) continue;
+
+      const toMatch = rest.match(/(?:to|for)\s+(\+?\d[\d\s-]*\d)/i);
+      if (!toMatch) continue;
+
+      events.push({
+        time,
+        to: toMatch[1].replace(/\s/g, ""),
+        kind: /^template/i.test(rest) ? "template" : "text",
+        status,
+        detail: status === "failed" ? rest.slice(0, 160) : undefined,
+      });
+    }
+  }
+
+  scan(OUT_LOG_PATH, "sent");
+  scan(ERROR_LOG_PATH, "failed");
+
+  events.sort((a, b) => (a.time < b.time ? 1 : -1));
+
+  return {
+    totalSent: events.filter((e) => e.status === "sent").length,
+    totalFailed: events.filter((e) => e.status === "failed").length,
+    events: events.slice(0, 30),
+  };
+}
+
 export async function getAdminStatus(_req: Request, res: Response) {
   let dbUp = true;
   try {
@@ -115,5 +185,6 @@ export async function getAdminStatus(_req: Request, res: Response) {
       : null,
     lastDeploy: readLastDeploy(),
     recentErrors: summarizeRecentErrors(),
+    whatsapp: summarizeWhatsAppActivity(),
   });
 }

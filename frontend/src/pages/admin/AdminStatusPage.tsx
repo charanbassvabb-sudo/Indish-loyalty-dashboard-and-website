@@ -9,6 +9,7 @@ import {
   ArrowLeft,
   GitCommitHorizontal,
   Clock,
+  MessageCircle,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAdminAuth } from "@/context/AdminAuthContext";
@@ -22,6 +23,11 @@ interface AdminStatus {
   externalCheck: { up: boolean; consecutiveFailures: number; checkedAt: string | null } | null;
   lastDeploy: { sha: string; message: string; actor: string; time: string; status: string } | null;
   recentErrors: { summary: string; count: number; lastSeen: string }[];
+  whatsapp: {
+    totalSent: number;
+    totalFailed: number;
+    events: { time: string; to: string; kind: "text" | "template"; status: "sent" | "failed"; detail?: string }[];
+  };
 }
 
 function relativeTime(iso: string | null): string {
@@ -159,7 +165,7 @@ export default function AdminStatusPage() {
           )}
         </section>
 
-        <section className="card-warm p-5">
+        <section className="card-warm mb-6 p-5">
           <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
             <AlertTriangle className="h-4 w-4 text-primary" />
             Errors, last 24h
@@ -179,6 +185,52 @@ export default function AdminStatusPage() {
                   <p className="mt-0.5 text-[0.7rem] text-muted-foreground">
                     {e.count}× · last {relativeTime(e.lastSeen)}
                   </p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        <section className="card-warm p-5">
+          <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
+            <MessageCircle className="h-4 w-4 text-primary" />
+            WhatsApp messages, last 24h
+          </h2>
+          {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
+          {!loading && status && (
+            <div className="mb-4 flex gap-3">
+              <div className="flex-1 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-center">
+                <p className="font-display text-2xl text-emerald-400">{status.whatsapp.totalSent}</p>
+                <p className="text-[0.65rem] uppercase tracking-wide text-muted-foreground">Sent</p>
+              </div>
+              <div className="flex-1 rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-center">
+                <p className="font-display text-2xl text-destructive">{status.whatsapp.totalFailed}</p>
+                <p className="text-[0.65rem] uppercase tracking-wide text-muted-foreground">Failed</p>
+              </div>
+            </div>
+          )}
+          {!loading && status && status.whatsapp.events.length === 0 && (
+            <p className="text-sm text-muted-foreground">No WhatsApp activity in the last 24 hours.</p>
+          )}
+          {!loading && status && status.whatsapp.events.length > 0 && (
+            <ul className="flex max-h-96 flex-col gap-2.5 overflow-y-auto">
+              {status.whatsapp.events.map((e, i) => (
+                <li key={i} className="flex items-start gap-2.5 border-b border-border/60 pb-2.5 last:border-0 last:pb-0">
+                  {e.status === "sent" ? (
+                    <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-400" />
+                  ) : (
+                    <XCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-destructive" />
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs text-foreground">
+                      {e.status === "sent" ? "Sent" : "Failed"} to {e.to}
+                      <span className="ml-1.5 rounded-full bg-secondary px-1.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-wide text-secondary-foreground">
+                        {e.kind}
+                      </span>
+                    </p>
+                    {e.detail && <p className="mt-0.5 truncate text-[0.7rem] text-muted-foreground">{e.detail}</p>}
+                    <p className="text-[0.65rem] text-muted-foreground">{relativeTime(e.time)}</p>
+                  </div>
                 </li>
               ))}
             </ul>
